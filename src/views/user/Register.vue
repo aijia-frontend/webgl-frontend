@@ -3,14 +3,13 @@
     <h3><span>注册</span></h3>
     <a-form ref="formRegister" :form="form" id="formRegister">
       <a-form-item>
-        <a-input
-          size="large"
-          type="text"
-          placeholder="邮箱"
-          v-decorator="['email', {rules: [{ required: true, type: 'email', message: '请输入邮箱地址' }], validateTrigger: ['change', 'blur']}]"
-        ></a-input>
+        <a-input size="large" placeholder="11 位手机号" v-decorator="['mobile', {rules: [{ required: true, message: '请输入正确的手机号', pattern: /^1[3456789]\d{9}$/ }, { validator: this.handlePhoneCheck } ], validateTrigger: ['change', 'blur'] }]">
+          <a-select slot="addonBefore" size="large" defaultValue="+86">
+            <a-select-option value="+86">+86</a-select-option>
+            <a-select-option value="+87">+87</a-select-option>
+          </a-select>
+        </a-input>
       </a-form-item>
-
       <a-popover
         placement="rightTop"
         :trigger="['focus']"
@@ -36,7 +35,6 @@
           ></a-input>
         </a-form-item>
       </a-popover>
-
       <a-form-item>
         <a-input
           size="large"
@@ -46,15 +44,6 @@
           v-decorator="['password2', {rules: [{ required: true, message: '至少6位密码，区分大小写' }, { validator: this.handlePasswordCheck }], validateTrigger: ['change', 'blur']}]"
         ></a-input>
       </a-form-item>
-
-      <a-form-item>
-        <a-input size="large" placeholder="11 位手机号" v-decorator="['mobile', {rules: [{ required: true, message: '请输入正确的手机号', pattern: /^1[3456789]\d{9}$/ }, { validator: this.handlePhoneCheck } ], validateTrigger: ['change', 'blur'] }]">
-          <a-select slot="addonBefore" size="large" defaultValue="+86">
-            <a-select-option value="+86">+86</a-select-option>
-            <a-select-option value="+87">+87</a-select-option>
-          </a-select>
-        </a-input>
-      </a-form-item>
       <!--<a-input-group size="large" compact>
             <a-select style="width: 20%" size="large" defaultValue="+86">
               <a-select-option value="+86">+86</a-select-option>
@@ -62,7 +51,6 @@
             </a-select>
             <a-input style="width: 80%" size="large" placeholder="11 位手机号"></a-input>
           </a-input-group>-->
-
       <a-row :gutter="16">
         <a-col class="gutter-row" :span="16">
           <a-form-item>
@@ -101,6 +89,7 @@
 <script>
 import { mixinDevice } from '@/utils/mixin.js'
 import { getSmsCaptcha } from '@/api/login'
+import { register } from '@/api/register'
 
 const levelNames = {
   0: '低',
@@ -209,13 +198,27 @@ export default {
       }
       this.state.passwordLevelChecked = false
     },
-
+    /**
+     * @description 注册用户
+     */
     handleSubmit () {
       const { form: { validateFields }, state, $router } = this
       validateFields({ force: true }, (err, values) => {
         if (!err) {
           state.passwordLevelChecked = false
-          $router.push({ name: 'registerResult', params: { ...values } })
+          console.log(values)
+          register(values).then(res => {
+            const { code, msg } = res
+            if (code === 1) {
+              $router.push({ name: 'registerResult', params: { ...values } })
+            } else {
+              this.$notification['error']({
+                message: '错误',
+                description: msg || '请求出现错误，请稍后再试',
+                duration: 4
+              })
+            }
+          })
         }
       })
     },
@@ -260,7 +263,7 @@ export default {
     requestFailed (err) {
       this.$notification['error']({
         message: '错误',
-        description: ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试',
+        description: err.msg || '请求出现错误，请稍后再试',
         duration: 4
       })
       this.registerBtn = false
