@@ -326,6 +326,11 @@ export const asyncRouterMap = [
     ]
   },
   {
+    path: '/meitu',
+    name: 'meitu',
+    component: () => import('../views/meitu/index')
+  },
+  {
     path: '*', redirect: '/404', hidden: true
   }
 ]
@@ -359,7 +364,7 @@ export const constantRouterMap = [
       {
         path: 'recover',
         name: 'recover',
-        component: undefined
+        component: () => import(/* webpackChunkName: "user" */ '@/views/user/Recover')
       }
     ]
   },

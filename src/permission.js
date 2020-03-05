@@ -10,14 +10,14 @@ import { ACCESS_TOKEN } from '@/store/mutation-types'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
-const whiteList = ['login', 'register', 'registerResult'] // no redirect whitelist
+// 白名单,该地址不进行身份校验
+const whiteList = ['login', 'register', 'registerResult', 'recover']
 const defaultRoutePath = '/dashboard/workplace'
 
 router.beforeEach((to, from, next) => {
-  NProgress.start() // start progress bar
+  NProgress.start()
   to.meta && (typeof to.meta.title !== 'undefined' && setDocumentTitle(`${to.meta.title} - ${domTitle}`))
   if (Vue.ls.get(ACCESS_TOKEN)) {
-    /* has token */
     if (to.path === '/user/login') {
       next({ path: defaultRoutePath })
       NProgress.done()
