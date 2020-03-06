@@ -26,28 +26,54 @@
           </a-sub-menu>
           <a-sub-menu key="sub2" class="basic-nav">
             <span slot="title">基础信息</span>
-            <a-menu-item key="5" >
+            <a-menu-item key="5">
               <div class="basic-navitem">
                 <span>亮度</span>
-                <a-slider id="test" :defaultValue="30" />
+                <a-slider
+                  id="test"
+                  :defaultValue="0"
+                  :min="-100"
+                  :max="100"
+                  :step="1"
+                  v-model="basic.bright"
+                />
               </div>
             </a-menu-item>
             <a-menu-item key="6">
               <div class="basic-navitem">
                 <span>对比度</span>
-                <a-slider id="test" :defaultValue="30" />
+                <a-slider
+                  id="test"
+                  :defaultValue="0"
+                  :min="0"
+                  :max="200"
+                  :step="1"
+                  v-model="basic.unsharpMask"
+                />
               </div>
             </a-menu-item>
             <a-menu-item key="7">
               <div class="basic-navitem">
                 <span>色相</span>
-                <a-slider id="test" :defaultValue="30" />
+                <a-slider
+                  id="test"
+                  :defaultValue="0"
+                  :min="-100"
+                  :max="100"
+                  v-model="basic.hue"
+                />
               </div>
             </a-menu-item>
             <a-menu-item key="8">
               <div class="basic-navitem">
                 <span>饱和度</span>
-                <a-slider id="test" :defaultValue="30" />
+                <a-slider
+                  id="test"
+                  :defaultValue="0"
+                  :min="-100"
+                  :max="100"
+                  v-model="basic.saturation"
+                />
               </div>
             </a-menu-item>
           </a-sub-menu>
@@ -66,8 +92,8 @@
             <span slot="title">蒙板</span>
             <a-menu-item key="9" class="mark-navitem">
               <ul>
-                <li v-for="(item,index) in marks" :key="index">
-                  <img :src="item.url" alt="" style="width:80px;height:50px;">
+                <li v-for="(item, index) in marks" :key="index">
+                  <img :src="item.url" alt="" style="width:80px;height:50px;" />
                   <p>{{ item.name }}</p>
                 </li>
               </ul>
@@ -76,133 +102,180 @@
         </a-menu>
       </a-layout-sider>
       <a-layout style="padding:24px">
-        <a-layout-content
-          :style="{ background: '#000', padding: '24px', margin: 0, minHeight: '280px' }"
-        >
-          <img src="https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original" alt="" class="beautify-img">
+        <a-layout-content :style="{ background: '#000', padding: '24px', margin: 0, minHeight: '280px' }" id="beautify">
+          <!-- <img
+            :src="originalImg"
+            alt=""
+            class="beautify-img"
+            id="image"
+          /> -->
         </a-layout-content>
       </a-layout>
     </a-layout>
   </a-layout>
 </template>
 <script>
+import fx from 'glfx'
 export default {
   data () {
     return {
       collapsed: false,
+      originalImg: require('../../assets/1.jpg'),
+      curBright: 0,
+      cruUnsharpMask: 0,
+      canvas: null,
+      imageElm: null,
+      texture: null,
+      draw: null,
       marks: [
         {
-          url: 'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
+          url:
+            'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
           name: '白天自然'
         },
         {
-          url: 'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
+          url:
+            'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
           name: '白天曙光'
         },
         {
-          url: 'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
+          url:
+            'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
           name: '白天暖白'
         },
         {
-          url: 'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
+          url:
+            'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
           name: '白天清新'
         },
         {
-          url: 'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
+          url:
+            'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
           name: '白天自然2.0'
         },
         {
-          url: 'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
+          url:
+            'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
           name: '夜晚暖光'
         },
         {
-          url: 'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
+          url:
+            'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
           name: '夜晚暖白'
         },
         {
-          url: 'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
+          url:
+            'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
           name: '夜晚微冷'
         },
         {
-          url: 'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
+          url:
+            'https://img15.ihomefnt.com/2/GeneralFile/fae9312af490571ab13da443cb5c662b943af88946f74185358fb2820aefb789.jpg!original',
           name: '夜晚灯光2.0'
         }
-      ]
+      ],
+      basic: {
+        bright: 0,
+        unsharpMask: 0,
+        hue: 0,
+        saturation: 0
+      }
+    }
+  },
+  watch: {
+    basic: {
+      handler (val) {
+        const { bright, unsharpMask, hue, saturation } = val
+        this.canvas.draw(this.texture).brightnessContrast(bright / 100, 0).unsharpMask(unsharpMask, 2).hueSaturation(hue / 100, saturation / 100).update()
+      },
+      deep: true
+    }
+  },
+  mounted () {
+    const self = this
+    const image = new Image()
+    image.src = require('../../assets/1.jpg')
+    image.className = 'beautify-img'
+    image.onload = function () {
+      document.querySelector('#beautify').append(image)
+      self.canvas = fx.canvas()
+      self.texture = self.canvas.texture(image)
+      self.texture.loadContentsOf(image)
+      self.canvas.draw(self.texture).update().replace(image)
     }
   }
 }
 </script>
 
 <style lang="less">
-.header{
+.header {
   display: flex;
   justify-content: center;
   color: #fff;
   font-size: 25px;
   letter-spacing: 10px;
 }
-.beautify-img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
+.beautify-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
-  #components-layout-demo-top-side-2 .logo {
-    width: 120px;
-    height: 31px;
-    background: rgba(255, 255, 255, 0.2);
-    margin: 16px 28px 16px 0;
+#components-layout-demo-top-side-2 .logo {
+  width: 120px;
+  height: 31px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 16px 28px 16px 0;
+}
+.ant-layout {
+  height: 100%;
+}
+.basic-navitem {
+  display: flex;
+  flex-flow: row nowrap;
+  span {
+    min-width: 43px;
+    text-align: right;
   }
-  .ant-layout{
-    height: 100%;
+  & > div {
+    flex: 1;
   }
-  .basic-navitem{
-    display: flex;
-    flex-flow: row nowrap;
-    span{
-      min-width: 43px;
-      text-align: right;
-    }
-    &>div{
-      flex: 1;
-    }
+}
+.radio-navitem {
+  padding-left: 10px !important;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  height: 100px;
+  min-height: 100px;
+  & > button {
+    margin: 0 5px;
+    width: 70px;
   }
-  .radio-navitem{
-    padding-left: 10px!important;
-    display: flex;
+}
+.mark-navitem {
+  padding-left: 10px !important;
+  min-height: 300px;
+  &:hover {
+    color: inherit;
+  }
+  ul {
     flex-flow: row wrap;
     justify-content: space-between;
-    height:100px ;
-    min-height: 100px;
-    &>button{
-      margin: 0 5px;
-      width: 70px;
+    display: flex;
+  }
+  li {
+    width: 80px;
+    &:hover {
+      color: #1890ff;
     }
   }
-  .mark-navitem{
-    padding-left: 10px!important;
-    min-height: 300px;
-    &:hover{
-      color: inherit;
-    }
-    ul{
-      flex-flow: row wrap;
-      justify-content: space-between;
-      display: flex;
-    }
-    li{
-      width: 80px;
-      &:hover{
-        color: #1890ff;
-      }
-    }
-    p{
-      font-size: 12px;
-    }
+  p {
+    font-size: 12px;
   }
-  .basic-nav{
-    /deep/ .ant-menu .ant-menu-item{
-      padding-left: 10px!important;
-    }
-
+}
+.basic-nav {
+  /deep/ .ant-menu .ant-menu-item {
+    padding-left: 10px !important;
   }
+}
 </style>
