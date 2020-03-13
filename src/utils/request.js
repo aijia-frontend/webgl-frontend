@@ -38,7 +38,7 @@ const err = (error) => {
   return Promise.reject(error)
 }
 
-// request interceptor
+// 请求拦截器
 service.interceptors.request.use(config => {
   const token = Vue.ls.get(ACCESS_TOKEN)
   if (token) {
@@ -47,7 +47,7 @@ service.interceptors.request.use(config => {
   return config
 }, err)
 
-// response interceptor
+// 相应拦截器
 service.interceptors.response.use((response) => {
   return response.data
 }, err)

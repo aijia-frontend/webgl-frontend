@@ -12,6 +12,7 @@
         :tabBarStyle="{ textAlign: 'center', borderBottom: 'unset' }"
         @change="handleTabClick"
       >
+        <!-- 账号密码登录 -->
         <a-tab-pane key="tab1" tab="账号密码登录">
           <a-alert v-if="isLoginError" type="error" showIcon style="margin-bottom: 24px;" message="账户或密码错误" />
           <a-form-item>
@@ -20,8 +21,8 @@
               type="text"
               placeholder="账户"
               v-decorator="[
-                'mobile',
-                {rules: [{ required: true, message: '请输入帐户名或邮箱地址', pattern: /^1[3456789]\d{9}$/ }, { validator: handleUsernameOrEmail }], validateTrigger: 'change'}
+                'account',
+                {rules: [{ required: true, message: '请输入帐户名、邮箱、手机号' }, { validator: validateUsernameOrMobile }], validateTrigger: 'change'}
               ]"
             >
               <a-icon slot="prefix" type="user" :style="{ color: 'rgba(0,0,0,.25)' }"/>
@@ -43,7 +44,8 @@
             </a-input>
           </a-form-item>
         </a-tab-pane>
-        <a-tab-pane key="tab2" tab="手机号登录">
+        <!-- 手机号登录 -->
+        <a-tab-pane key="tab2" tab="验证码登录">
           <a-form-item>
             <a-input size="large" type="text" placeholder="手机号" v-decorator="['mobile', {rules: [{ required: true, pattern: /^1[34578]\d{9}$/, message: '请输入正确的手机号' }], validateTrigger: 'change'}]">
               <a-icon slot="prefix" type="mobile" :style="{ color: 'rgba(0,0,0,.25)' }"/>
@@ -111,6 +113,7 @@ import TwoStepCaptcha from '@/components/tools/TwoStepCaptcha'
 import { mapActions } from 'vuex'
 import { timeFix } from '@/utils/util'
 import { getSmsCaptcha, get2step } from '@/api/login'
+import pattern from '@/utils/patterns'
 
 export default {
   components: {
@@ -118,6 +121,7 @@ export default {
   },
   data () {
     return {
+      // 账号登录类型（'tab1':账号密码登录，'tab2':验证码登录）
       customActiveKey: 'tab1',
       loginBtn: false,
       // login type: 0 email, 1 username, 2 telephone
@@ -129,7 +133,7 @@ export default {
       state: {
         time: 60,
         loginBtn: false,
-        // login type: 0 email, 1 username, 2 telephone
+        // login type: 0 email, 1 username, 2 mobile
         loginType: 0,
         smsSendBtn: false
       }
@@ -147,39 +151,34 @@ export default {
   },
   methods: {
     ...mapActions(['Login', 'Logout']),
-    // handler
-    handleUsernameOrEmail (rule, value, callback) {
+    /**
+     * @description 账号密码登录（校验是否是用户名、邮箱、手机号）
+    */
+    validateUsernameOrMobile (rule, value, callback) {
       const { state } = this
-      const regex = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/
-      if (regex.test(value)) {
+      if (pattern.email.test(value)) { // 邮箱登录
         state.loginType = 0
-      } else {
+      } else if (pattern.name.test(value)) { // 用户名登录
         state.loginType = 1
+      } else if (pattern.mobile.test(value)) { // 手机号登录
+        state.loginType = 2
+      } else if (!value) {
+        callback(new Error('只能输入的帐户名、邮箱、手机号'))
       }
       callback()
     },
-    handleTabClick (key) {
-      this.customActiveKey = key
-      // this.form.resetFields()
-    },
+    /**
+     * @description 登录
+     * @param { e:Object } 当前输入框对象
+     */
     handleSubmit (e) {
       e.preventDefault()
-      const {
-        form: { validateFields },
-        state,
-        customActiveKey,
-        Login
-      } = this
-
+      const { form: { validateFields }, state, customActiveKey, Login } = this
       state.loginBtn = true
-
-      const validateFieldsKey = customActiveKey === 'tab1' ? ['mobile', 'password'] : ['mobile', 'captcha']
-
+      const validateFieldsKey = customActiveKey === 'tab1' ? ['account', 'password'] : ['mobile', 'captcha']
       validateFields(validateFieldsKey, { force: true }, (err, values) => {
         if (!err) {
-          console.log('login form', values)
-          const loginParams = { ...values }
-          loginParams[!state.loginType ? 'email' : 'mobile'] = values.mobile
+          const loginParams = { ...values, loginType: state.loginType }
           loginParams.password = values.password
           Login(loginParams)
             .then((res) => this.loginSuccess(res))
@@ -194,6 +193,11 @@ export default {
         }
       })
     },
+    handleTabClick (key) {
+      this.customActiveKey = key
+      // this.form.resetFields()
+    },
+
     getCaptcha (e) {
       e.preventDefault()
       const { form: { validateFields }, state } = this

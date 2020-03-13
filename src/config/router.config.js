@@ -11,6 +11,31 @@ export const asyncRouterMap = [
     meta: { title: '首页' },
     redirect: '/dashboard/workplace',
     children: [
+      // 账户
+      {
+        path: '/account',
+        name: 'account',
+        component: RouteView,
+        meta: { title: '账户', keepAlive: true, icon: 'user' },
+        children: [
+          {
+            path: '/account/user',
+            name: 'user',
+            component: () => import('@/views/account/TableList'),
+            meta: { title: '用户', keepAlive: false, permission: [ 'table' ] }
+          },
+          {
+            path: '/account/role',
+            name: 'role',
+            meta: { title: '角色', keepAlive: false, permission: [ 'table' ] }
+          },
+          {
+            path: '/account/auth',
+            name: 'auth',
+            meta: { title: '权限', keepAlive: false, permission: [ 'table' ] }
+          }
+        ]
+      },
       // dashboard
       {
         path: '/dashboard',
@@ -208,54 +233,54 @@ export const asyncRouterMap = [
 
       // account
       {
-        path: '/account',
+        path: '/test',
         component: RouteView,
-        redirect: '/account/center',
-        name: 'account',
+        redirect: '/test/center',
+        name: 'test',
         meta: { title: '个人页', icon: 'user', keepAlive: true, permission: [ 'user' ] },
         children: [
           {
-            path: '/account/center',
+            path: '/test/center',
             name: 'center',
-            component: () => import('@/views/account/center/Index'),
+            component: () => import('@/views/test/center/Index'),
             meta: { title: '个人中心', keepAlive: true, permission: [ 'user' ] }
           },
           {
-            path: '/account/settings',
+            path: '/test/settings',
             name: 'settings',
-            component: () => import('@/views/account/settings/Index'),
+            component: () => import('@/views/test/settings/Index'),
             meta: { title: '个人设置', hideHeader: true, permission: [ 'user' ] },
-            redirect: '/account/settings/base',
+            redirect: '/test/settings/base',
             hideChildrenInMenu: true,
             children: [
               {
-                path: '/account/settings/base',
+                path: '/test/settings/base',
                 name: 'BaseSettings',
-                component: () => import('@/views/account/settings/BaseSetting'),
+                component: () => import('@/views/test/settings/BaseSetting'),
                 meta: { title: '基本设置', permission: [ 'user' ] }
               },
               {
-                path: '/account/settings/security',
+                path: '/test/settings/security',
                 name: 'SecuritySettings',
-                component: () => import('@/views/account/settings/Security'),
+                component: () => import('@/views/test/settings/Security'),
                 meta: { title: '安全设置', keepAlive: true, permission: [ 'user' ] }
               },
               {
-                path: '/account/settings/custom',
+                path: '/test/settings/custom',
                 name: 'CustomSettings',
-                component: () => import('@/views/account/settings/Custom'),
+                component: () => import('@/views/test/settings/Custom'),
                 meta: { title: '个性化设置', keepAlive: true, permission: [ 'user' ] }
               },
               {
-                path: '/account/settings/binding',
+                path: '/test/settings/binding',
                 name: 'BindingSettings',
-                component: () => import('@/views/account/settings/Binding'),
+                component: () => import('@/views/test/settings/Binding'),
                 meta: { title: '账户绑定', keepAlive: true, permission: [ 'user' ] }
               },
               {
-                path: '/account/settings/notification',
+                path: '/test/settings/notification',
                 name: 'NotificationSettings',
-                component: () => import('@/views/account/settings/Notification'),
+                component: () => import('@/views/test/settings/Notification'),
                 meta: { title: '新消息通知', keepAlive: true, permission: [ 'user' ] }
               }
             ]
@@ -328,7 +353,7 @@ export const asyncRouterMap = [
   {
     path: '/meitu',
     name: 'meitu',
-    component: () => import('../views/meitu/index')
+    component: () => import('../views/meitu/glfx')
   },
   {
     path: '*', redirect: '/404', hidden: true
