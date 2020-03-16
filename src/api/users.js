@@ -9,7 +9,7 @@ export default api
  */
 export function queryUsers (parameter = {}) {
   return axios({
-    url: '/users',
+    url: '/queryPagingList',
     method: 'get',
     params: parameter
   })

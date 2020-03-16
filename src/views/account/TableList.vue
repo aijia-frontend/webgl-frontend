@@ -80,12 +80,9 @@
       <span slot="serial" slot-scope="text, record, index">
         {{ index + 1 }}
       </span>
+      <!-- 中文字数 length/2 -->
       <span slot="userName" slot-scope="text">
         <ellipsis :length="10" tooltip>{{ text }}</ellipsis>
-      </span>
-      <!-- 中文字数 length/2 -->
-      <span slot="description" slot-scope="text">
-        <ellipsis :length="20" tooltip>{{ text }}</ellipsis>
       </span>
       <span slot="status" slot-scope="text">
         <a-badge :status="text | statusTypeFilter" :text="text | statusFilter" />
@@ -97,7 +94,7 @@
           <a-divider type="vertical" />
           <a @click="handleSub(record)">删除</a>
           <a-divider type="vertical" />
-          <a @click="handleSub(record)">锁定</a>
+          <a @click="handleSub(record)">{{ record.status | statusOperation }}</a>
         </template>
       </span>
     </s-table>
@@ -156,9 +153,8 @@ export default {
           scopedSlots: { customRender: 'userName' }
         },
         {
-          title: '描述',
-          dataIndex: 'description',
-          scopedSlots: { customRender: 'description' }
+          title: '手机号',
+          dataIndex: 'mobile'
         },
         {
           title: '状态',
@@ -167,18 +163,18 @@ export default {
         },
         {
           title: '登录次数',
-          dataIndex: 'callNo',
+          dataIndex: 'count',
           sorter: true,
           customRender: (text) => text + ' 次'
         },
         {
           title: '登录时间',
-          dataIndex: 'updatedAt',
+          dataIndex: 'loginAt',
           sorter: true
         },
         {
           title: '创建时间',
-          dataIndex: 'updatedAt',
+          dataIndex: 'createdAt',
           sorter: true
         },
         {
@@ -191,10 +187,12 @@ export default {
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
         console.log('loadData.parameter', parameter)
-        return queryUsers()
+        const { pageNo, pageSize } = parameter
+        debugger
+        return queryUsers({ pageNo: pageNo, pageSize })
           .then(res => {
-            console.log('all users', res)
-            return res
+            debugger
+            return res.data
           })
       },
       selectedRowKeys: [],
@@ -217,6 +215,12 @@ export default {
     },
     statusTypeFilter (type) {
       return statusMap[type].status
+    },
+    statusOperation (type) {
+      if (type === 0) {
+        return '激活'
+      }
+      return '锁定'
     }
   },
   created () {
