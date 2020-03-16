@@ -14,3 +14,18 @@ export function queryUsers (parameter = {}) {
     params: parameter
   })
 }
+
+export function enDisabledUser (parameter) {
+  return axios({
+    url: '/enDisabledUser',
+    method: 'post',
+    data: parameter
+  })
+}
+
+export function destroy (id) {
+  return axios({
+    url: `/users/${id}`,
+    method: 'delete'
+  })
+}

@@ -55,7 +55,7 @@
     <div class="table-operator">
       <a-button type="primary" icon="plus" @click="$refs.createModal.add()">新建</a-button>
       <a-button type="dashed" @click="tableOption">{{ optionAlertShow && '关闭' || '开启' }} alert</a-button>
-      <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
+      <a-dropdown v-action:edit @change="edit(record)">
         <a-menu slot="overlay">
           <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
           <!-- lock | unlock -->
@@ -82,7 +82,7 @@
       </span>
       <!-- 中文字数 length/2 -->
       <span slot="userName" slot-scope="text">
-        <ellipsis :length="10" tooltip>{{ text }}</ellipsis>
+        <ellipsis :length="11" tooltip>{{ text }}</ellipsis>
       </span>
       <span slot="status" slot-scope="text">
         <a-badge :status="text | statusTypeFilter" :text="text | statusFilter" />
@@ -92,10 +92,19 @@
         <template>
           <a @click="handleEdit(record)">编辑</a>
           <a-divider type="vertical" />
-          <a @click="handleSub(record)">删除</a>
+          <a-popconfirm
+            title="确认要删除该用户吗?"
+            @confirm="handleDelete(record)"
+            @cancel="cancel"
+            okText="Yes"
+            cancelText="No"
+          >
+            <a>删除</a>
+          </a-popconfirm>
+
           <a-divider type="vertical" />
-          <a @click="handleSub(record)">{{ record.status | statusOperation }}</a>
-        </template>
+          <a @click="handleStatus(record)">{{ record.status | statusOperation }}</a>
+          </a-popconfirm></template>
       </span>
     </s-table>
     <create-form ref="createModal" @ok="handleOk" />
@@ -109,7 +118,7 @@ import { STable, Ellipsis } from '@/components'
 import StepByStepModal from './modules/StepByStepModal'
 import CreateForm from './modules/CreateForm'
 import { getRoleList } from '@/api/manage'
-import { queryUsers } from '@/api/users'
+import { queryUsers, enDisabledUser, destroy } from '@/api/users'
 // 用户账号状态
 const statusMap = {
   [-1]: {
@@ -188,10 +197,8 @@ export default {
       loadData: parameter => {
         console.log('loadData.parameter', parameter)
         const { pageNo, pageSize } = parameter
-        debugger
         return queryUsers({ pageNo: pageNo, pageSize })
           .then(res => {
-            debugger
             return res.data
           })
       },
@@ -257,12 +264,26 @@ export default {
       console.log(record)
       this.$refs.modal.edit(record)
     },
-    handleSub (record) {
-      if (record.status !== 0) {
-        this.$message.info(`${record.no} 订阅成功`)
-      } else {
-        this.$message.error(`${record.no} 订阅失败，规则已关闭`)
-      }
+    handleDelete (record) {
+      const self = this
+      destroy(record.id).then(res => {
+        if (res.code === 1) {
+          self.$refs.table.refresh()
+        }
+      })
+    },
+    /**
+     * @description 激活或禁用账号
+     * @param { record:Object } 表格单行数据
+     */
+    handleStatus (record) {
+      const { id, status } = record
+      const newStatus = status === 0 ? 1 : 0
+      enDisabledUser({ id, status: newStatus }).then(res => {
+        if (res.code === 1) {
+          record.status = newStatus
+        }
+      })
     },
     handleOk () {
       this.$refs.table.refresh()

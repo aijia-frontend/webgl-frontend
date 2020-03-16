@@ -7,7 +7,7 @@ import { axios } from '@/utils/request'
  */
 export function register ({ mobile, password, password2, captcha }) {
   return axios({
-    url: '/register',
+    url: '/users',
     method: 'post',
     data: { mobile, password, captcha }
   })
