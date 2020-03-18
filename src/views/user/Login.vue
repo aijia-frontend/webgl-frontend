@@ -242,7 +242,6 @@ export default {
       })
     },
     loginSuccess (res) {
-      console.log(res)
       // check res.homePage define, set $router.push name res.homePage
       // Why not enter onComplete
       /*
@@ -254,7 +253,7 @@ export default {
         })
       })
       */
-      this.$router.push({ path: '/' })
+      this.$router.push({ path: '/house' })
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
         this.$notification.success({

@@ -8,7 +8,7 @@ const user = {
     token: '',
     name: '',
     welcome: '',
-    avatar: '',
+    avatar: require('./../../../public/avatar2.jpg'),
     roles: [],
     info: {}
   },
@@ -46,7 +46,6 @@ const user = {
             reject(response)
           }
         }).catch(error => {
-          alert('1212')
           reject(error)
         })
       })

@@ -5,12 +5,15 @@
         v-if="visible"
         :class="[fixedHeader && 'ant-header-fixedHeader', sidebarOpened ? 'ant-header-side-opened' : 'ant-header-side-closed', ]"
         :style="{ padding: '0' }">
-        <div v-if="mode === 'sidemenu'" class="header">
-          <a-icon v-if="device==='mobile'" class="trigger" :type="collapsed ? 'menu-fold' : 'menu-unfold'" @click="toggle"/>
-          <a-icon v-else class="trigger" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="toggle"/>
+        <div class="header">
+          <div v-if="mode === 'sidemenu'">
+            <a-icon v-if="device==='mobile'" class="trigger" :type="collapsed ? 'menu-fold' : 'menu-unfold'" @click="toggle"/>
+            <a-icon v-else class="trigger" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="toggle"/>
+          </div>
+          <div v-else></div>
           <user-menu></user-menu>
         </div>
-        <div v-else :class="['top-nav-header-index', theme]">
+        <!-- <div v-else :class="['top-nav-header-index', theme]">
           <div class="header-index-wide">
             <div class="header-index-left">
               <logo class="top-nav-header" :show-title="device !== 'mobile'"/>
@@ -19,7 +22,7 @@
             </div>
             <user-menu class="header-index-right"></user-menu>
           </div>
-        </div>
+        </div> -->
       </a-layout-header>
     </div>
   </transition>
@@ -108,7 +111,10 @@ export default {
 
 <style lang="less">
 @import '../index.less';
-
+.header{
+  display: flex;
+  justify-content: space-between;
+}
 .header-animat{
   position: relative;
   z-index: @ant-global-header-zindex;
