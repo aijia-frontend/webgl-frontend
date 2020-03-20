@@ -11,7 +11,7 @@ import { ACCESS_TOKEN } from '@/store/mutation-types'
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
 // 白名单,该地址不进行身份校验
-const whiteList = ['login', 'register', 'registerResult', 'recover', 'meitu']
+const whiteList = ['login', 'register', 'registerResult', 'recover', 'meitu', 'drawing']
 const defaultRoutePath = '/house'
 
 router.beforeEach((to, from, next) => {

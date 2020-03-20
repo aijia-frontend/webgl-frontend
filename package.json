@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "dev": "vue-cli-service serve",
-    "dev:prd":"vue-cli-service serve --mode production",
+    "dev:prd": "vue-cli-service serve --mode production",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint",
@@ -26,6 +26,7 @@
     "mockjs2": "1.0.8",
     "moment": "^2.24.0",
     "nprogress": "^0.2.0",
+    "simply-deferred": "^3.0.0",
     "smartcrop": "^2.0.3",
     "viser-vue": "^2.4.6",
     "vue": "^2.6.10",
