@@ -74,7 +74,6 @@ _.extend(Point, {
 
     return intersecter[0]
   },
-
   transform (pt, tf) {
     const x = pt.x * tf.a + pt.y * tf.c + tf.e
     const y = pt.x * tf.b + pt.y * tf.d + tf.f
@@ -141,7 +140,7 @@ _.extend(Line, {
       }
 
       if (_.min([line.p1.y, line.p2.y]) - pt.y > options.tol ||
-        pt.y - _.max([line.p1.y, line.p2.y]) > options.tol) {
+       pt.y - _.max([line.p1.y, line.p2.y]) > options.tol) {
         return false
       }
     }
@@ -206,9 +205,9 @@ _.extend(Line, {
     }
 
     const p1 = ((l2.p2.y - l2.p1.y) * (l2.p1.x - l1.p1.x) - (l2.p2.x - l2.p1.x) * (l2.p1.y - l1.p1.y)) /
-      ((l2.p2.y - l2.p1.y) * (l1.p2.x - l1.p1.x) - (l2.p2.x - l2.p1.x) * (l1.p2.y - l1.p1.y))
+        ((l2.p2.y - l2.p1.y) * (l1.p2.x - l1.p1.x) - (l2.p2.x - l2.p1.x) * (l1.p2.y - l1.p1.y))
     const p2 = ((l1.p2.y - l1.p1.y) * (l2.p1.x - l1.p1.x) - (l1.p2.x - l1.p1.x) * (l2.p1.y - l1.p1.y)) /
-      ((l1.p2.x - l1.p1.x) * (l2.p2.y - l2.p1.y) - (l1.p2.y - l1.p1.y) * (l2.p2.x - l2.p1.x))
+        ((l1.p2.x - l1.p1.x) * (l2.p2.y - l2.p1.y) - (l1.p2.y - l1.p1.y) * (l2.p2.x - l2.p1.x))
     const pt = {
       x: (l1.p2.x - l1.p1.x) * p1 + l1.p1.x,
       y: (l1.p2.y - l1.p1.y) * p1 + l1.p1.y
@@ -289,9 +288,9 @@ _.extend(Line.prototype, {
 
   equal (other) {
     return this.p1.x === other.p1.x &&
-      this.p1.y === other.p1.y &&
-      this.p2.x === other.p2.x &&
-      this.p2.y === other.p2.y
+    this.p1.y === other.p1.y &&
+    this.p2.x === other.p2.x &&
+    this.p2.y === other.p2.y
   },
 
   paramPoint (param) {

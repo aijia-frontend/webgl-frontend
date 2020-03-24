@@ -1,18 +1,19 @@
+
 const table = {}
 
 const Dispatch = {
-  register (type, convert) {
+  register: function (type, convert) {
     table[type] = convert
   },
 
-  invoke (action, data, options) {
-    var type = data.tag || options.tag
-    if (!type) throw new Error('invalid data.')
+  invoke: function (action, data, options) {
+    const type = data.tag || options.tag
+    if (!type) throw new Error('未指定类型')
 
-    var convert = table[type]
-    if (!convert) throw new Error('unknown type: ' + type)
+    const convert = table[type]
+    if (!convert) throw new Error('未找到处理程序： ' + type)
 
-    var ans = convert[action](data, options)
+    const ans = convert[action](data, options)
 
     if (ans.attrs && ans.attrs.transform) {
       ans.attrs.transform = table['transform'][action](ans.attrs.transform, options)

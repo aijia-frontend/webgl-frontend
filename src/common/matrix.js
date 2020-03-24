@@ -1,20 +1,15 @@
-import {
-  isUndefined as _isUndefined,
-  isNull as _isNull,
-  extend as _extend,
-  eq as _eq
-} from 'lodash'
+import * as _ from 'lodash'
 
 const Matrix = function (a, b, c, d, e, f) {
-  this.a = _isUndefined(a) || _isNull(a) ? 1 : a
-  this.b = _isUndefined(b) || _isNull(b) ? 0 : b
-  this.c = _isUndefined(c) || _isNull(c) ? 0 : c
-  this.d = _isUndefined(d) || _isNull(d) ? 1 : d
-  this.e = _isUndefined(e) || _isNull(e) ? 0 : e
-  this.f = _isUndefined(f) || _isNull(f) ? 0 : f
+  this.a = _.isUndefined(a) || _.isNull(a) ? 1 : a
+  this.b = _.isUndefined(b) || _.isNull(b) ? 0 : b
+  this.c = _.isUndefined(c) || _.isNull(c) ? 0 : c
+  this.d = _.isUndefined(d) || _.isNull(d) ? 1 : d
+  this.e = _.isUndefined(e) || _.isNull(e) ? 0 : e
+  this.f = _.isUndefined(f) || _.isNull(f) ? 0 : f
 }
 
-_extend(Matrix, {
+_.extend(Matrix, {
   identity () {
     return new Matrix(1, 0, 0, 1, 0, 0)
   },
@@ -26,7 +21,7 @@ _extend(Matrix, {
   }
 })
 
-_extend(Matrix.prototype, {
+_.extend(Matrix.prototype, {
   assign (other) {
     this.a = other.a
     this.b = other.b
@@ -65,12 +60,12 @@ _extend(Matrix.prototype, {
   },
 
   eq (other) {
-    return _eq(this.a, other.a) &&
-      _eq(this.b, other.b) &&
-      _eq(this.c, other.c) &&
-      _eq(this.d, other.d) &&
-      _eq(this.e, other.e) &&
-      _eq(this.f, other.f)
+    return _.eq(this.a, other.a) &&
+      _.eq(this.b, other.b) &&
+      _.eq(this.c, other.c) &&
+      _.eq(this.d, other.d) &&
+      _.eq(this.e, other.e) &&
+      _.eq(this.f, other.f)
   },
 
   multiply (other) {
@@ -101,7 +96,7 @@ _extend(Matrix.prototype, {
 
     const det = a * d - b * c
     if (det < 0.00000000001) {
-      throw new Error('Cannot find the inverse matrix!')
+      throw new Error('Can not find the inverse matrix!')
     }
 
     this.a = d / det

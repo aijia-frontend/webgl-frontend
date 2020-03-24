@@ -1,7 +1,7 @@
 import Dispatch from './dispatch'
 import Unit from './unit'
 
-const getOrigin = function (options) {
+var getOrigin = function (options) {
   const origin = {
     x: 0,
     y: 0
@@ -35,8 +35,11 @@ const toPhysical = function (pt, options) {
   }
 }
 
-const convert = {
-  toLogical: toLogical,
-  toPhysical: toPhysical
+const Point = {
+  toLogical,
+  toPhysical
 }
-Dispatch.register('point', convert)
+
+Dispatch.register('point', Point)
+
+export default Point

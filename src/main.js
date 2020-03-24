@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: jiangronghua
+ * @Date: 2020-03-04 15:49:52
+ * @LastEditors: jiangronghua
+ * @LastEditTime: 2020-03-24 16:42:25
+ */
 // with polyfills
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
@@ -14,7 +21,6 @@ import './core/lazy_use'
 import './permission' // permission control
 import './utils/filter' // global filter
 import './components/global.less'
-import './style/index.less'
 
 Vue.config.productionTip = false
 

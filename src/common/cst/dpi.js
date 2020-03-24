@@ -2,8 +2,7 @@ let dpiVal = null
 
 const getSysDPI = function () {
   const $el = document.getElementById('dpi')
-  const val = $el.offsetHeight // 1in has {val} px
-  $el.remove()
+  const val = $el.offsetHeight
 
   return val
 }
