@@ -1,10 +1,3 @@
-/*
- * @Description:
- * @Author: jiangronghua
- * @Date: 2020-03-04 15:49:52
- * @LastEditors: jiangronghua
- * @LastEditTime: 2020-03-24 17:26:31
- */
 // eslint-disable-next-line
 import { UserLayout, BasicLayout, RouteView, BlankLayout, PageView, BasicHeader } from '@/layouts'
 
@@ -14,7 +7,7 @@ import { UserLayout, BasicLayout, RouteView, BlankLayout, PageView, BasicHeader 
  */
 export const constantRouterMap = [
   {
-    path: '/',
+    path: '/user',
     component: UserLayout,
     redirect: '/user/login',
     hidden: true,
