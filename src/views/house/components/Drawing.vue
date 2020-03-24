@@ -1,187 +1,267 @@
 <template>
-  <div id="content">
-    <div id="top">
-      <span>缩放倍数：{{ this.tf.a }}</span>
-    </div>
-    <div id="left">
-      <button @click="executeCmd('drawWall')">画线</button>
-      <button @click="deleteS">删除首部</button>
-      <button @click="deleteM">删除中间</button>
-      <button @click="deleteE">删除尾部</button>
-    </div>
-    <div id="center" :class="cursor" @click="onClick" @mousewheel="onMouseWheel">
-      <svg id="canvas" xmlns="http://www.w3.org/2000/svg" version="1.1"
-           width="100%" height="100%">
-        <rect class="background" x="0" y="0" width="100%" height="100%" fill="#DCDCDC"></rect>
-        <container id="container" :lines="lines" :transform="tf.toString()">
-        </container>
-        <transient id="transient" :transform="tf.toString()"></transient>
-      </svg>
-    </div>
-    <div id="footer">
-    </div>
-  </div>
+  <svg id="svg" width="100%" height="100%" @click="onClick" @mousewheel="onMouseWheel">
+    <defs>
+      <patternGroup id="grid-sym-minus-min" :pattern="patternMinusMin" :scale="scale"></patternGroup>
+      <patternGroup id="grid-sym-minus" :pattern="patternMinus" :scale="scale"></patternGroup>
+      <patternGroup id="grid-sym" :pattern="pattern" :scale="scale"></patternGroup>
+      <patternGroup id="grid-sym-plus" :pattern="patternPlus" :scale="scale"></patternGroup>
+    </defs>
+    <g class="background">
+      <rect class="bg-color" width="100%" hight="100%"/>
+      <rect
+        :class="bgFill"
+        :x="boundary.x"
+        :y="boundary.y"
+        :width="boundary.width"
+        :height="boundary.height"
+        fill="url(#grid-sym)"
+        :transform="tf.toString()"></rect>
+      <g class="ucs" :transform="tf.toString()">
+        <line
+          class="ucs-h"
+          :x1="boundary.x"
+          :x2="boundary.x + boundary.width"
+          :y1="boundary.y + boundary.height * 0.5"
+          :y2="boundary.y + boundary.height * 0.5"
+          stroke="#00FF00"
+          stroke-width="1"></line>
+        <line
+          class="ucs-v"
+          :y1="boundary.y"
+          :y2="boundary.y + boundary.height"
+          :x1="boundary.x + boundary.width * 0.5"
+          :x2="boundary.x + boundary.width * 0.5"
+          stroke="#Dc143C"
+          stroke-width="1"></line>
+      </g>
+    </g>
+    <g class="container" :transform="tf.toString()">
+      <circle :cx="origin.x" :cy="origin.y" r="5" fill="none" stroke="red"></circle>
+    </g>
+    <g class="transient"></g>
+  </svg>
 </template>
 
 <script>
-import container from './container'
-import transient from './transient'
-import DataStore from '../models/dataStore'
-import wall from './wall'
-import { uniqueId as _uniqueId } from 'lodash'
-import Matrix from '../common/matrix'
-import { Point } from '../common/geometry'
+import CST from '@/common/cst/main'
+import DataStore from '@/common/dataStore'
+import { Point } from '@/common/geometry'
+import Matrix from '@/common/matrix'
+import patternGroup from './patternGroup'
+const page = {
+  width: 160000, // 160000(mm) 160m
+  height: 100000
+}
+const space = 500 // space = 500mm
+const defaultGidSpace = 20 // mm
 
 export default {
   name: 'Drawing',
+
   data () {
     return {
-      lines: DataStore._lines,
-      cursor: 'default',
-      tf: Matrix.identity()
+      pattern: {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
+      },
+      patternPlus: {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
+      },
+      patternMinus: {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
+      },
+      patternMinusMin: {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
+      },
+      origin: {},
+      tf: Matrix.identity(),
+      boundary: {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
+      },
+      scale: 1,
+      bgFill: 'grid-sym'
     }
   },
-  components: {
-    container,
-    transient,
-    wall
-  },
-  beforeCreate () {
-  },
-  created () {
-  },
-  activated () {
-  },
-  mounted () {
-    this.init()
-  },
-  methods: {
-    init () {
-      const $el = document.getElementById('center')
-      this.offsetLeft = $el.offsetLeft
-      this.offsetTop = $el.offsetTop
-    },
-    render () {},
-    onClick (e) {
-      let pos = this.posInView(e)
-      pos = this.posInContent(pos)
-      let line = this.lines[0]
-      line.attrs.id = _uniqueId('line')
-      line.attrs.x1 = pos.x
-      line.attrs.y1 = pos.y
-      this.lines.pop()
-      this.lines.push(line)
-      return pos
-    },
-    onMouseWheel (e) {
-      let delta = e.wheelDelta / 120
-      let factor = delta > 0 ? Math.pow(5.0, 0.2) : Math.pow(0.2, 0.2)
-      let pos = this.posInView(e)
 
-      let tf = this.transform().clone()
+  components: {
+    patternGroup
+  },
+
+  mounted () {
+    this.el = document.getElementById('svg')
+    this.calcPattern()
+    this.defaultGidSpace = defaultGidSpace
+  },
+
+  methods: {
+    calcPattern () {
+      const $el = document.getElementById('canvas')
+      const width = $el.offsetWidth
+      const height = $el.offsetHeight
+      this.origin = {
+        x: width * 0.5,
+        y: height * 0.5
+      }
+      DataStore.origin = this.origin
+
+      const pxPerMM = CST.mm.toPhysical(1.0)
+      this.pattern.x = this.origin.x
+      this.pattern.y = this.origin.y
+      this.pattern.width = space * pxPerMM
+      this.pattern.height = space * pxPerMM
+
+      this.patternPlus = Object.assign({}, this.pattern)
+      this.patternPlus.width *= 5
+      this.patternPlus.height *= 5
+
+      this.patternMinus = Object.assign({}, this.pattern)
+      this.patternMinus.width *= 0.2
+      this.patternMinus.height *= 0.2
+
+      this.patternMinusMin = Object.assign({}, this.patternMinus)
+      this.patternMinusMin.width *= 0.2
+      this.patternMinusMin.height *= 0.2
+
+      const rect = {
+        x: -page.width * 0.5,
+        y: page.height * 0.5,
+        width: page.width,
+        height: page.height
+      }
+      this.boundary = CST.toPhysical({
+        tag: 'rect',
+        attrs: rect
+      }, {
+        origin: this.origin
+      }).attrs
+    },
+
+    posInView (pt) {
+      const ctm = this.el.getScreenCTM()
+      const pos = this.el.createSVGPoint()
+      pos.x = pt.x
+      pos.y = pt.y
+
+      return pos.matrixTransform(ctm.inverse())
+    },
+
+    posInContent (pt, options = { clasp: true }) { // 默认吸附
+      let pos = this.posInView(pt)
+      console.log('物理坐标：', pos)
+      const tf = this.transform().clone().inverse()
+      pos = Point.transform(pos, tf)
+
+      const cstOptions = {
+        tag: 'point',
+        origin: this.origin
+      }
+      const lPos = CST.toLogical(pos, cstOptions)
+      if (options.clasp) {
+        lPos.x = Math.round(lPos.x / this.defaultGidSpace) * this.defaultGidSpace
+        lPos.y = Math.round(lPos.y / this.defaultGidSpace) * this.defaultGidSpace
+      }
+      console.log('逻辑左边：', lPos)
+
+      return CST.toPhysical(lPos, cstOptions)
+    },
+
+    onClick (e) {
+      console.log('click')
+      console.log(this.posInContent({
+        x: e.pageX,
+        y: e.pageY
+      }))
+    },
+
+    onMouseWheel (e) {
+      let delta = 0
+      delta = e.wheelDelta / 120
+      const factor = delta > 0 ? Math.pow(5.0, 0.2) : Math.pow(0.2, 0.2)
+      const pos = this.posInView({
+        x: e.pageX,
+        y: e.pageY
+      })
+
+      const tf = this.transform().clone()
 
       tf.translate(-pos.x, -pos.y)
         .scale(factor, factor)
         .translate(pos.x, pos.y)
+      if (tf.a <= 0.005) {
+        console.log('can not zoom out')
+        // return
+      }
+      if (tf.a >= 20) {
+        console.log('can not zoom in')
+        return
+      }
+      if (tf.a <= 0.2) {
+        this.bgFill = 'grid-sym-plus'
+        this.defaultGidSpace = 500
+      } else if (tf.a >= 5) {
+        this.bgFill = 'grid-sym-minus-min'
+        this.defaultGidSpace = 4
+      } else if (tf.a >= 2) {
+        this.bgFill = 'grid-sym-minus'
+        this.defaultGidSpace = 20
+      } else {
+        this.bgFill = 'grid-sym'
+        this.defaultGidSpace = 100
+      }
 
       this.transform(tf)
+      this.scale = tf.a
+      console.log('缩放倍数：', tf.a)
     },
-    posInView (e) {
-      return {
-        x: e.clientX - this.offsetLeft,
-        y: e.clientY - this.offsetTop
-      }
-    },
-    posInContent (pt) {
-      return Point.transform(pt, this.tf.inverse())
-    },
+
     transform (v) {
       if (v) this.tf = v
       return this.tf
-    },
-    executeCmd (cmd) {
-      this.$bus.$emit(cmd, {
-        drawing: this
-      })
-      /* (Array.from({ length: 2 })).forEach(item => {
-        const x = this.lines[this.lines.length - 1].attrs.x1
-        const y = this.lines[this.lines.length - 1].attrs.y1
-        this.lines.push({
-          attrs: {
-            id: _uniqueId('line'),
-            x1: x + 60,
-            y1: y + 60,
-            x2: 500,
-            y2: 500
-          }
-        })
-      }) */
-    },
-
-    deleteS () {
-      this.lines.shift()
-    },
-    deleteM () {
-      const m = Math.floor(this.lines.length / 2)
-      this.lines.splice(m, 1)
-    },
-    deleteE () {
-      this.lines.pop()
     }
   }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="less" scoped>
-  #content {
-    width: 100%;
-    height: 100%;
-    #top {
-      position: absolute;
-      width: 100%;
-      height: 60px;
-      border: 0.1px solid white;
-      background-color: #A9A9A9;
-    }
-    #left {
-      position: absolute;
-      top: 60px;
-      width: 200px;
-      height: calc(100% - 60px);
-      border: 0.1px solid white;
-      background-color: #A9A9A9;
-    }
-    #center {
-      position: absolute;
-      top: 60px;
-      left: 200px;
-      width: calc(100% - 200px);
-      height: calc(100% - 100px);
-    }
-    #footer {
-      position: absolute;
-      bottom: 0px;
-      left: 200px;
-      width: calc(100% - 200px);
-      height: 40px;
-      border: 0.1px solid white;
-      background-color: #A9A9A9;
-      div {
-        position: relative;
-        border: 0.1px solid green;
-        height: 40px;
-        flex: border-box;
-      }
-      #footer-left {
-        width: 60%;
-      }
-      #footer-right {
-        width: 40%;
-      }
-    }
-    .default {
-      cursor: crosshair;
-    }
+<style scoped>
+  svg line,
+  svg circle,
+  svg polyline,
+  svg rect,
+  svg path,
+  svg polygon,
+  svg ellipse {
+    vector-effect: non-scaling-stroke;
+    fill: none;
+  }
+  svg .wall {
+    fill: url() !important;
+  }
+  svg rect.bg-color {
+    fill: #F0F4F5 !important;
+  }
+  svg rect.grid-sym-minus-min {
+    fill: url(#grid-sym-minus-min) !important;
+  }
+  svg rect.grid-sym-minus {
+    fill: url(#grid-sym-minus) !important;
+  }
+  svg rect.grid-sym {
+    fill: url(#grid-sym) !important;
+  }
+  svg rect.grid-sym-plus {
+    fill: url(#grid-sym-plus) !important;
   }
 </style>

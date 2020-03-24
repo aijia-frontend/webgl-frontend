@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: jiangronghua
+ * @Date: 2020-03-04 15:49:52
+ * @LastEditors: jiangronghua
+ * @LastEditTime: 2020-03-24 16:03:53
+ -->
 <template>
   <a-locale-provider :locale="locale">
     <div id="app">
@@ -25,6 +32,5 @@ export default {
 <style>
   #app {
     height: 100%;
-    margin: 0px -24px;
   }
 </style>
