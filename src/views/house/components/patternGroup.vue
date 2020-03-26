@@ -15,7 +15,7 @@
       :y2="item * pattern.height / 5"
       class="h"
       stroke="#ffffff"
-      stroke-opacity="0.8"
+      stroke-opacity="0.5"
       :stroke-width="1 / scale"/>
     <line
       v-for="item in size"
@@ -26,7 +26,7 @@
       :x2="item * pattern.width / 5"
       class="v"
       stroke="#ffffff"
-      stroke-opacity="0.8"
+      stroke-opacity="0.5"
       :stroke-width="1 / scale"/>
     <line
       x1="0"
@@ -34,7 +34,7 @@
       :x2="pattern.width"
       y2="0"
       stroke="#ffffff"
-      stroke-opacity="1"
+      stroke-opacity="0.6"
       :stroke-width="2 / scale"/>
     <line
       x1="0"
@@ -42,7 +42,7 @@
       x2="0"
       :y2="pattern.height"
       stroke="#ffffff"
-      stroke-opacity="1"
+      stroke-opacity="0.6"
       :stroke-width="2 / scale"/>
     <line />
   </pattern>
@@ -80,8 +80,6 @@ export default {
       required: true,
       default: 1
     }
-  },
-  watch: {
   }
 }
 </script>

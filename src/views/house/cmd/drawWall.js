@@ -1,7 +1,7 @@
-import JigCmd from '../common/jigCmd'
+import JigCmd from '@/common/jigCmd'
 import wallJig from './wallJig'
 const DrawWall = JigCmd.extend({
-  jitType: wallJig,
+  jigType: wallJig,
 
   initialize (attrs, options) {
     this.attrs = attrs

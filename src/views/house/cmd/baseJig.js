@@ -24,7 +24,17 @@ const Jig = BaseJig.extend({
 
   prepare () {},
 
-  onKeyUp () {},
+  onKeyUp (e) {
+    const code = e.charCode ? e.charCode : e.keyCode
+    switch (code) {
+      case 27:
+        // cancel
+        this.cancel()
+        break
+      default:
+        break
+    }
+  },
 
   onClick () {},
 
@@ -36,7 +46,15 @@ const Jig = BaseJig.extend({
 
   updateCanvas () {},
 
-  getPosInView () {}
+  getPosInView () {},
+
+  getPos (e) {
+    const pos = this.drawing.posInContent({
+      x: e.pageX,
+      y: e.pageY
+    })
+    return pos
+  }
 })
 
 export default Jig

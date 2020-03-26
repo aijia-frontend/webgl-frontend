@@ -1,7 +1,7 @@
 // 注册绘图程序
 import { each as _each } from 'lodash'
 import DrawWall from './drawWall'
-import Global from '../common/global'
+import Global from '@/common/global'
 import Vue from 'vue'
 
 // eslint-disable-next-line no-new

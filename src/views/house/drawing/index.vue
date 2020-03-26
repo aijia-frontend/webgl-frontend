@@ -4,7 +4,7 @@
     <div id="canvas">
       <drawing :cursor="cursor"></drawing>
     </div>
-    <leftTools></leftTools>
+    <leftTools style="z-index:99"></leftTools>
     <div id="footer"></div>
   </div>
 </template>
@@ -12,6 +12,7 @@
 <script>
 import drawing from '../components/drawing'
 import leftTools from '../components/leftTools'
+import '../cmd/main'
 
 export default {
   name: 'Drawing',

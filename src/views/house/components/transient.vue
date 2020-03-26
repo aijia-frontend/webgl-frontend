@@ -5,20 +5,31 @@
 </template>
 
 <script>
-import wall from './wall'
+// import wall from './wall'
 export default {
-  name: 'trainsent',
+  name: 'Trainsent',
   props: {},
   components: {
-    wall
+    // wall
   },
   data () {
     return {}
   },
-  methods: {}
+  methods: {
+    addEntity (node) {
+      if (Array.isArray(node)) {
+        node.forEach(t => this.addEntity(t))
+      }
+      this.$el.appendChild(node)
+    }
+  }
 }
 </script>
 
-<style scoped>
-
+<style lang="less" scoped>
+  g.transient {
+    polygon.wall {
+      fill: #F5F5DC !important;
+    }
+  }
 </style>

@@ -1,13 +1,27 @@
 <template>
-  <svg id="svg" width="100%" height="100%" @click="onClick" @mousewheel="onMouseWheel">
+  <svg
+    id="svg"
+    width="100%"
+    height="100%"
+    @click="onClick"
+    @mousewheel="onMouseWheel"
+    @contextmenu="onRightClick">
     <defs>
       <patternGroup id="grid-sym-minus-min" :pattern="patternMinusMin" :scale="scale"></patternGroup>
       <patternGroup id="grid-sym-minus" :pattern="patternMinus" :scale="scale"></patternGroup>
       <patternGroup id="grid-sym" :pattern="pattern" :scale="scale"></patternGroup>
       <patternGroup id="grid-sym-plus" :pattern="patternPlus" :scale="scale"></patternGroup>
+      <wallFill></wallFill>
     </defs>
     <g class="background">
       <rect class="bg-color" width="100%" hight="100%"/>
+      <rect
+        class="boundary-bg"
+        :x="boundary.x"
+        :y="boundary.y"
+        :width="boundary.width"
+        :height="boundary.height"
+        :transform="tf.toString()"></rect>
       <rect
         :class="bgFill"
         :x="boundary.x"
@@ -23,7 +37,6 @@
           :x2="boundary.x + boundary.width"
           :y1="boundary.y + boundary.height * 0.5"
           :y2="boundary.y + boundary.height * 0.5"
-          stroke="#00FF00"
           stroke-width="1"></line>
         <line
           class="ucs-v"
@@ -31,14 +44,16 @@
           :y2="boundary.y + boundary.height"
           :x1="boundary.x + boundary.width * 0.5"
           :x2="boundary.x + boundary.width * 0.5"
-          stroke="#Dc143C"
           stroke-width="1"></line>
       </g>
     </g>
     <g class="container" :transform="tf.toString()">
       <circle :cx="origin.x" :cy="origin.y" r="5" fill="none" stroke="red"></circle>
     </g>
-    <g class="transient"></g>
+    <!-- <g class="transient" :transform="tf.toString()">
+      <ca></ca>
+    </g> -->
+    <transient ref="transient" :transform="tf.toString()"></transient>
   </svg>
 </template>
 
@@ -47,13 +62,20 @@ import CST from '@/common/cst/main'
 import DataStore from '@/common/dataStore'
 import { Point } from '@/common/geometry'
 import Matrix from '@/common/matrix'
+import Global from '@/common/global'
 import patternGroup from './patternGroup'
+import wallFill from './wallFill'
+import transient from './transient'
 const page = {
   width: 160000, // 160000(mm) 160m
   height: 100000
 }
-const space = 500 // space = 500mm
-const defaultGidSpace = 20 // mm
+const boundary = {
+  width: 20000,
+  height: 20000
+}
+const space = 2500 // space = 500mm
+const defaultGidSpace = 10 // mm
 
 export default {
   name: 'Drawing',
@@ -98,13 +120,42 @@ export default {
   },
 
   components: {
-    patternGroup
+    patternGroup,
+    wallFill,
+    transient
+  },
+
+  watch: {
+    tf: function (newV, oldV) {
+      console.log('==============>change', newV)
+      if (newV.a <= 0.2) {
+        this.bgFill = 'grid-sym-plus'
+        this.defaultGidSpace = 500
+      } else if (newV.a <= 1) {
+        this.bgFill = 'grid-sym'
+        this.defaultGidSpace = 500
+      } else if (newV.a <= 5) {
+        this.bgFill = 'grid-sym-minus'
+        this.defaultGidSpace = 100
+      } else {
+        this.bgFill = 'grid-sym-minus-min'
+        this.defaultGidSpace = 20
+      }
+      this.scale = newV.a
+      console.log('缩放倍数：', newV.a)
+    }
+  },
+
+  created () {
   },
 
   mounted () {
     this.el = document.getElementById('svg')
     this.calcPattern()
     this.defaultGidSpace = defaultGidSpace
+    this.zoomExtend()
+    Global.drawing = this
+    this.load()
   },
 
   methods: {
@@ -118,22 +169,22 @@ export default {
       }
       DataStore.origin = this.origin
 
-      const pxPerMM = CST.mm.toPhysical(1.0)
+      const pxPerMM = CST.mm.toPhysical(1.0) // 1
       this.pattern.x = this.origin.x
       this.pattern.y = this.origin.y
-      this.pattern.width = space * pxPerMM
+      this.pattern.width = space * pxPerMM // 500mm
       this.pattern.height = space * pxPerMM
 
-      this.patternPlus = Object.assign({}, this.pattern)
-      this.patternPlus.width *= 5
+      this.patternPlus = Object.assign({}, this.pattern) // 5
+      this.patternPlus.width *= 5 // 1250
       this.patternPlus.height *= 5
 
-      this.patternMinus = Object.assign({}, this.pattern)
-      this.patternMinus.width *= 0.2
+      this.patternMinus = Object.assign({}, this.pattern) // 0.2
+      this.patternMinus.width *= 0.2 // 100
       this.patternMinus.height *= 0.2
 
-      this.patternMinusMin = Object.assign({}, this.patternMinus)
-      this.patternMinusMin.width *= 0.2
+      this.patternMinusMin = Object.assign({}, this.patternMinus) // 0.04
+      this.patternMinusMin.width *= 0.2 // 20
       this.patternMinusMin.height *= 0.2
 
       const rect = {
@@ -150,6 +201,9 @@ export default {
       }).attrs
     },
 
+    load () {
+    },
+
     posInView (pt) {
       const ctm = this.el.getScreenCTM()
       const pos = this.el.createSVGPoint()
@@ -161,7 +215,7 @@ export default {
 
     posInContent (pt, options = { clasp: true }) { // 默认吸附
       let pos = this.posInView(pt)
-      console.log('物理坐标：', pos)
+      // console.log('物理坐标：', pos)
       const tf = this.transform().clone().inverse()
       pos = Point.transform(pos, tf)
 
@@ -174,17 +228,13 @@ export default {
         lPos.x = Math.round(lPos.x / this.defaultGidSpace) * this.defaultGidSpace
         lPos.y = Math.round(lPos.y / this.defaultGidSpace) * this.defaultGidSpace
       }
-      console.log('逻辑左边：', lPos)
+      // console.log('逻辑坐标：', lPos)
 
       return CST.toPhysical(lPos, cstOptions)
     },
 
     onClick (e) {
-      console.log('click')
-      console.log(this.posInContent({
-        x: e.pageX,
-        y: e.pageY
-      }))
+      console.log('逻辑坐标：', CST.toLogical(this.posInContent({ x: e.pageX, y: e.pageY }), { tag: 'point', origin: this.origin }))
     },
 
     onMouseWheel (e) {
@@ -209,28 +259,36 @@ export default {
         console.log('can not zoom in')
         return
       }
-      if (tf.a <= 0.2) {
-        this.bgFill = 'grid-sym-plus'
-        this.defaultGidSpace = 500
-      } else if (tf.a >= 5) {
-        this.bgFill = 'grid-sym-minus-min'
-        this.defaultGidSpace = 4
-      } else if (tf.a >= 2) {
-        this.bgFill = 'grid-sym-minus'
-        this.defaultGidSpace = 20
-      } else {
-        this.bgFill = 'grid-sym'
-        this.defaultGidSpace = 100
-      }
 
       this.transform(tf)
-      this.scale = tf.a
-      console.log('缩放倍数：', tf.a)
+    },
+
+    onRightClick (e) {
+      console.log('rightClick')
+      e.preventDefault()
+      e.stopPropagation()
     },
 
     transform (v) {
       if (v) this.tf = v
       return this.tf
+    },
+
+    zoomExtend () {
+      const pxPerMM = CST.mm.toPhysical(1.0)
+      const width = boundary.width * pxPerMM
+      const height = boundary.height * pxPerMM
+      const scale = Math.min(this.origin.x * 2 / width, this.origin.y * 2 / height) * 0.8
+      console.log('scale:', scale)
+      const tf = Matrix.identity()
+      tf.translate(-this.origin.x, -this.origin.y)
+      tf.scale(scale, scale)
+      tf.translate(this.origin.x, this.origin.y)
+      this.transform(tf)
+    },
+
+    addTransient (node) {
+      this.$refs.transient.addEntity(node)
     }
   }
 }
@@ -245,9 +303,22 @@ export default {
   svg ellipse {
     vector-effect: non-scaling-stroke;
     fill: none;
+    stroke: #ffffff;
+    stroke-width: 1px;
   }
+  svg .ucs-h {
+    stroke: #00FF00 !important;
+  }
+
+  svg .ucs-v {
+    stroke: #Dc143C !important;
+  }
+
   svg .wall {
     fill: url() !important;
+  }
+  svg rect.boundary-bg {
+    fill: #236 !important;
   }
   svg rect.bg-color {
     fill: #F0F4F5 !important;

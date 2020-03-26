@@ -20,6 +20,7 @@
     "core-js": "^3.1.2",
     "enquire.js": "^2.1.6",
     "glfx": "0.0.4",
+    "jquery": "^3.4.1",
     "lodash.get": "^4.4.2",
     "lodash.pick": "^4.4.0",
     "md5": "^2.2.1",

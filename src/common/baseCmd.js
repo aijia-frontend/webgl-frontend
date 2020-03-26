@@ -1,13 +1,13 @@
 import { extend as _extend } from 'lodash'
 import extend from './extend'
-import Deferred from 'simply-deferred'
-// import { Deferred as $Deferred } from 'jquery'
+// import Deferred from 'simply-deferred'
+import { Deferred as $Deferred } from 'jquery'
 import Vue from 'vue'
 const vue = new Vue()
 
 const BaseCmd = function (attrs) {
   this._name = attrs.name
-  this.defer = new Deferred()
+  this.defer = new $Deferred()
 
   this.initialize.apply(this, arguments)
 }

@@ -4,7 +4,7 @@ import * as $ from 'jquery'
 import Vue from 'vue'
 const vue = new Vue()
 
-const eventNameSpace = '.custom-Hard'
+const eventNameSpace = '.house-drawing'
 
 const BaseJig = function (attrs, options) {
   this.canvas = attrs.canvas
@@ -83,7 +83,9 @@ _extend(BaseJig.prototype, vue, {
   },
 
   remPreview: function () {
-    if (this.container) this.container.destroy()
+    const transient = document.getElementsByClassName('transient')[0]
+    transient.innerHTML = ''
+    // nodes.forEach(item => item.remove())
   }
 })
 
