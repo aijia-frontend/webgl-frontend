@@ -15,7 +15,7 @@
       :y2="item * pattern.height / 5"
       class="h"
       stroke="#ffffff"
-      stroke-opacity="0.5"
+      stroke-opacity="0.3"
       :stroke-width="1 / scale"/>
     <line
       v-for="item in size"
@@ -26,7 +26,7 @@
       :x2="item * pattern.width / 5"
       class="v"
       stroke="#ffffff"
-      stroke-opacity="0.5"
+      stroke-opacity="0.3"
       :stroke-width="1 / scale"/>
     <line
       x1="0"

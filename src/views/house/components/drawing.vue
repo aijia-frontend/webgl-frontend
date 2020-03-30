@@ -71,11 +71,11 @@ const page = {
   height: 100000
 }
 const boundary = {
-  width: 20000,
-  height: 20000
+  width: 8000,
+  height: 8000
 }
-const space = 2500 // space = 500mm
-const defaultGidSpace = 10 // mm
+const space = 100 // space = 500mm
+const defaultGidSpace = 100 // mm
 
 export default {
   name: 'Drawing',
@@ -130,16 +130,16 @@ export default {
       console.log('==============>change', newV)
       if (newV.a <= 0.2) {
         this.bgFill = 'grid-sym-plus'
-        this.defaultGidSpace = 500
+        // this.defaultGidSpace = 500
       } else if (newV.a <= 1) {
         this.bgFill = 'grid-sym'
-        this.defaultGidSpace = 500
+        // this.defaultGidSpace = 500
       } else if (newV.a <= 5) {
         this.bgFill = 'grid-sym-minus'
-        this.defaultGidSpace = 100
+        // this.defaultGidSpace = 100
       } else {
         this.bgFill = 'grid-sym-minus-min'
-        this.defaultGidSpace = 20
+        // this.defaultGidSpace = 20
       }
       this.scale = newV.a
       console.log('缩放倍数：', newV.a)
@@ -240,7 +240,7 @@ export default {
     onMouseWheel (e) {
       let delta = 0
       delta = e.wheelDelta / 120
-      const factor = delta > 0 ? Math.pow(5.0, 0.2) : Math.pow(0.2, 0.2)
+      const factor = delta > 0 ? Math.pow(5.0, 0.05) : Math.pow(0.2, 0.05)
       const pos = this.posInView({
         x: e.pageX,
         y: e.pageY
@@ -251,11 +251,11 @@ export default {
       tf.translate(-pos.x, -pos.y)
         .scale(factor, factor)
         .translate(pos.x, pos.y)
-      if (tf.a <= 0.005) {
+      if (tf.a <= 0.01) {
         console.log('can not zoom out')
-        // return
+        return
       }
-      if (tf.a >= 20) {
+      if (tf.a >= 0.1) {
         console.log('can not zoom in')
         return
       }

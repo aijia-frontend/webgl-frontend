@@ -4,6 +4,7 @@
  *:
  */
 import _ from 'lodash'
+import Vector from './vector'
 const DEFAULT_TOL = 0.01
 
 const Point = function (x, y) {
@@ -109,9 +110,14 @@ _.extend(Line, {
   },
 
   isParallel (l1, l2, tol) {
-    tol = tol || 0.01
+    // vector angle
+    tol = tol || Math.PI / 18000 // 0.01 Math.PI / 180
+    const angle1 = Vector.angle(l1.p1, l1.p2) % Math.PI
+    const angle2 = Vector.angle(l2.p1, l2.p2) % Math.PI
+    return Math.abs(angle1 - angle2) <= tol
+    /* console.log('isParallel:', angle2, angle1, Math.abs(angle1 - angle2) <= tol)
     return Math.abs((l1.p2.x - l1.p1.x) * (l2.p2.y - l2.p1.y) -
-      (l1.p2.y - l1.p1.y) * (l2.p2.x - l2.p1.x)) <= tol
+      (l1.p2.y - l1.p1.y) * (l2.p2.x - l2.p1.x)) <= tol */
   },
 
   isPtOn (pt, line, options) {
@@ -120,7 +126,19 @@ _.extend(Line, {
       tol: DEFAULT_TOL
     })
 
-    if (!options.extend) {
+    const line1 = new Line(pt, line.p1)
+    const isParallel = Line.isParallel(line, line1)
+    if (!isParallel) return false
+    const dis1 = Point.distance(pt, line.p1)
+    const dis2 = Point.distance(pt, line.p2)
+    const dis = Point.distance(line.p1, line.p2)
+    console.log('此点与该线的任意一点组成的线是否与该线平行：', isParallel) // vector angle
+    console.log('此点到p1的距离：', dis1) // dis to p1
+    console.log('此点到p2的距离：', dis2) // dis to p2
+    console.log('此点是否在线上：', isParallel && dis1 <= dis && dis2 <= dis)
+    return dis1 <= dis && dis2 <= dis
+
+    /* if (!options.extend) {
       // vertical
       if (Math.abs(line.p1.x - line.p2.x) < options.tol) {
         return Math.abs(pt.x - line.p1.x) < options.tol &&
@@ -155,7 +173,7 @@ _.extend(Line, {
     }
 
     return Math.abs((pt.x - line.p1.x) * (line.p2.y - line.p1.y) -
-      (pt.y - line.p1.y) * (line.p2.x - line.p1.x)) <= options.tol
+      (pt.y - line.p1.y) * (line.p2.x - line.p1.x)) <= options.tol */
   },
 
   ptLineDist (pt, line) {

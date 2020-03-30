@@ -103,6 +103,7 @@ const wallJig = Jig.extend({
       SvgRenderer.attr(this.preview.line, { points: getPointsStr([pos]) })
     } else {
       this.update(pos)
+      this.preview.line.remove()
       if (this.lastPreview) {
         this.updatePrePreView()
       }
@@ -138,6 +139,13 @@ const wallJig = Jig.extend({
     if (intersect2) {
       lastPoints[4].x = currentPoints[5].x = intersect2.point.x
       lastPoints[4].y = currentPoints[5].y = intersect2.point.y
+    }
+    if (!intersect1 && !intersect2) {
+      // 2 wall need merge
+      currentPoints[0] = lastPoints[0]
+      currentPoints[1] = lastPoints[1]
+      currentPoints[5] = lastPoints[5]
+      this.lastPreview.wall.remove()
     }
   }
 })
