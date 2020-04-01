@@ -1,13 +1,13 @@
-import factory from './factory'
+import Factory from './factory'
 import wall from './wall'
-import DataStore from './dataStore'
-import Vue from 'vue'
+// import DataStore from './dataStore'
+// import Vue from 'vue'
 
-DataStore.initialize()
-Vue.mixin({
-  DataStore,
-})
-
+// DataStore.initialize()
+// Vue.mixin({
+//   DataStore,
+// })
+console.log(wall, wall.type)
 const registry = [wall]
 
-factory.regist(registry)
+Factory.regist(registry)

@@ -47,9 +47,10 @@
           stroke-width="1"></line>
       </g>
     </g>
-    <g class="container" :transform="tf.toString()">
+    <container ref="container" :transform="tf.toString()"></container>
+    <!-- <g class="container" :transform="tf.toString()">
       <circle :cx="origin.x" :cy="origin.y" r="5" fill="none" stroke="red"></circle>
-    </g>
+    </g> -->
     <!-- <g class="transient" :transform="tf.toString()">
       <ca></ca>
     </g> -->
@@ -58,14 +59,18 @@
 </template>
 
 <script>
+import patternGroup from './patternGroup'
+import wallFill from './wallFill'
+import container from './container'
+import transient from './transient'
+
 import CST from '@/common/cst/main'
-import DataStore from '@/common/dataStore'
 import { Point } from '@/common/geometry'
 import Matrix from '@/common/matrix'
 import Global from '@/common/global'
-import patternGroup from './patternGroup'
-import wallFill from './wallFill'
-import transient from './transient'
+// import DataStore from '@/common/dataStore'
+import DataStore from '../models/dataStore'
+
 const page = {
   width: 160000, // 160000(mm) 160m
   height: 100000
@@ -122,6 +127,7 @@ export default {
   components: {
     patternGroup,
     wallFill,
+    container,
     transient
   },
 
@@ -156,6 +162,7 @@ export default {
     this.zoomExtend()
     Global.drawing = this
     this.load()
+    // setTimeout(() => this.load(), 3000)
   },
 
   methods: {
@@ -202,6 +209,15 @@ export default {
     },
 
     load () {
+      window.dataStore = DataStore
+      // test
+      /* console.log('=====>dataStore:', DataStore)
+      DataStore.create({
+        type: 'wall',
+        data: { x1: 0, x2: 500, y1: 0, y2: 500, parent: this.$refs.container }
+      }) */
+      // model.render()
+      // this.addContainer(model.$el)
     },
 
     posInView (pt) {
@@ -285,6 +301,12 @@ export default {
       tf.scale(scale, scale)
       tf.translate(this.origin.x, this.origin.y)
       this.transform(tf)
+    },
+
+    addContainer (data) {
+      Object.assign(data.data, { parent: this.$refs.container })
+      DataStore.create(data)
+      // this.$refs.container.addEntity(data)
     },
 
     addTransient (node) {

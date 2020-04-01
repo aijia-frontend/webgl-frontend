@@ -1,22 +1,29 @@
 <template>
-    <g class="container">
-      <wall v-for="line in lines" :key="line.attrs.id" :attrs="line.attrs"></wall>
-    </g>
+  <g class="container">
+    <!-- <wall v-for="line in lines" :key="line.attrs.id" :attrs="line.attrs"></wall> -->
+  </g>
 </template>
 
 <script>
-import wall from './wall'
+// import wall from './wall'
 export default {
-  name: 'container',
+  name: 'Container',
   components: {
-    wall
+    // wall
   },
-  props: ['lines'],
+  // props: ['lines'],
   data () {
     return {
     }
   },
-  methods: {}
+  methods: {
+    addEntity (node) {
+      if (Array.isArray(node)) {
+        node.forEach(t => this.addEntity(t))
+      }
+      this.$el.appendChild(node)
+    }
+  }
 }
 </script>
 

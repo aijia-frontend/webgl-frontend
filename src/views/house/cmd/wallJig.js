@@ -4,7 +4,7 @@ import Vector from '@/common/vector'
 import { Point, Line } from '@/common/geometry'
 import Matrix from '@/common/matrix'
 import CST from '@/common/cst/main'
-import _cloneDeep from 'lodash/cloneDeep'
+// import _cloneDeep from 'lodash/cloneDeep'
 // import PreViewBuilder from './previewBuilder'
 const wallWeight = 200 // mm
 
@@ -54,6 +54,9 @@ const pointTransform = (pt, center, angle) => {
 const wallJig = Jig.extend({
   initialize (attrs, options) {
     Jig.prototype.initialize.apply(this, arguments)
+    if (this.attrs.startPos) {
+      this.startPos = this.attrs.startPos
+    }
   },
 
   start () {
@@ -93,6 +96,7 @@ const wallJig = Jig.extend({
     const p3 = pointTransform(point, this.startPos, angle - Math.PI / 2)
     const p4 = pointAdd(p3, offset)
     const points = [this.startPos, p1, p2, pos, p4, p3]
+    this.points = points
     SvgRenderer.attr(this.preview.wall, { points: getPointsStr(points) })
   },
 
@@ -103,14 +107,18 @@ const wallJig = Jig.extend({
       SvgRenderer.attr(this.preview.line, { points: getPointsStr([pos]) })
     } else {
       this.update(pos)
-      this.preview.line.remove()
+      this.data.points = this.points
+      this.data.startPos = this.startPos
+      this.data.endPos = pos
+      this.end()
+      /* this.preview.line.remove()
       if (this.lastPreview) {
         this.updatePrePreView()
-      }
+      } */
       // re new
-      this.lastPreview = _cloneDeep(this.preview)
+      /* this.lastPreview = _cloneDeep(this.preview)
       this.prepare()
-      this.startPos = pos
+      this.startPos = pos */
     }
   },
 

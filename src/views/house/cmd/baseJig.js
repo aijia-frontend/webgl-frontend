@@ -15,6 +15,7 @@ const Jig = BaseJig.extend({
   initialize (attrs, options) {
     this.attrs = attrs
     this.drawing = attrs.drawing
+    this.data = {}
     BaseJig.prototype.initialize.apply(this, arguments)
   },
 

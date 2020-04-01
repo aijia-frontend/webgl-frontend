@@ -13,6 +13,7 @@
 import drawing from '../components/drawing'
 import leftTools from '../components/leftTools'
 import '../cmd/main'
+import '../models/main'
 
 export default {
   name: 'Drawing',

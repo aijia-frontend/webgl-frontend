@@ -2,6 +2,8 @@ import DPI from './dpi'
 import Unit from './unit'
 import './point'
 import './rect'
+import './line'
+import './polygon'
 import Dispatch from './dispatch'
 const CST = {
   toLogical (data, options) {
