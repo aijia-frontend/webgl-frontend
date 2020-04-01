@@ -1,5 +1,6 @@
 import Model from './model'
 import CST from '@/common/cst/index'
+import _cloneDeep from 'lodash/cloneDeep'
 
 const getPointsStr = pts => {
   return pts.map(pt => pt.x + ' ' + pt.y).join(' ')
@@ -12,7 +13,16 @@ const Wall = Model.extend({
   },
 
   points () {
-    return this.attrs.points
+    return _cloneDeep(this.attrs.points)
+  },
+
+  originPoints () {
+    return [this.attrs.points[0], this.attrs.points[3]]
+  },
+
+  pointsStr () {
+    const points = this.attrs.points.map(pt => CST.toPhysical(pt, { tag: 'point', origin: this.origin }))
+    return getPointsStr(points)
   },
 
   toJSON () {

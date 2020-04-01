@@ -304,8 +304,8 @@ export default {
     },
 
     addContainer (data) {
-      Object.assign(data.data, { parent: this.$refs.container })
-      DataStore.create(data)
+      // Object.assign(data.data, { parent: this.$refs.container })
+      // DataStore.create(data)
       // this.$refs.container.addEntity(data)
     },
 

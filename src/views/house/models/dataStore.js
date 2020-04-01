@@ -11,7 +11,8 @@ const DataStore = new Vue({
     },
     origin: null,
     activeCmd: null,
-    nodes: []
+    nodes: [],
+    walls: []
   },
 
   watch: {
@@ -29,6 +30,7 @@ const DataStore = new Vue({
       if (_isObject(data)) {
         // this.newEntity(data)
         const model = Factory.create(data)
+        this[model.type + 's'].push(model)
         this.nodes.push(model)
         return model
       }

@@ -1,7 +1,7 @@
 import _extend from 'lodash/extend'
 import extend from '@/common/extend'
 import UUID from '@/common/uuid'
-import SvgRenderer from '@/common/renderTools'
+// import SvgRenderer from '@/common/renderTools'
 import CST from '@/common/cst/main'
 import DataStore from './dataStore'
 import Vue from 'vue'
@@ -16,9 +16,9 @@ _extend(Model.prototype, vue, {
     this.attrs = attrs
     this.options = options
     this.uid = UUID.generate()
-    this.parent = attrs.parent
     this.origin = DataStore.origin
-    if (this.parent) this.render()
+    // this.parent = attrs.parent
+    // if (this.parent) this.render()
   },
 
   update (data, options = { silent: false }) {
@@ -27,15 +27,15 @@ _extend(Model.prototype, vue, {
   },
 
   onChange () {
-    this.$el.remove()
-    this.render()
+    // this.$el.remove()
+    // this.render()
   },
 
   render () {
-    this.$el = SvgRenderer.render(this.toJSON())
-    if (this.parent && this.parent.$el) {
-      this.parent.$el.appendChild(this.$el)
-    }
+    // this.$el = SvgRenderer.render(this.toJSON())
+    // if (this.parent && this.parent.$el) {
+    // this.parent.$el.appendChild(this.$el)
+    // }
   },
 
   toJSON () {

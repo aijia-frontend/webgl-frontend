@@ -1,15 +1,16 @@
 <template>
   <g class="container">
+    <walls></walls>
     <!-- <wall v-for="line in lines" :key="line.attrs.id" :attrs="line.attrs"></wall> -->
   </g>
 </template>
 
 <script>
-// import wall from './wall'
+import walls from './walls'
 export default {
   name: 'Container',
   components: {
-    // wall
+    walls
   },
   // props: ['lines'],
   data () {
