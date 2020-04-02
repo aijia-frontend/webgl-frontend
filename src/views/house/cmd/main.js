@@ -1,21 +1,23 @@
 // 注册绘图程序
 import { each as _each } from 'lodash'
+import DataStore from '../models/dataStore'
 import DrawWall from './drawWall'
-import Global from '@/common/global'
+import Pan from './pan'
 import Vue from 'vue'
 
 // eslint-disable-next-line no-new
 new Vue({
   data: {
     registry: {
-      drawWall: DrawWall
+      drawWall: DrawWall,
+      pan: Pan
     },
     activeCmd: null
   },
 
   watch: {
     activeCmd: function (cmd) {
-      Global.activeCmd = cmd
+      DataStore.activeCmd = cmd
     }
   },
 
@@ -43,6 +45,7 @@ new Vue({
       const that = this
       _each(this.registry, (Handler, name) => {
         that.$bus.$on(name, function (attrs, options) {
+          console.log('=========>执行命令： ', name)
           that.$bus.$emit('execute', name)
           if (that.activeCmd) {
             that.activeCmd.cancel()

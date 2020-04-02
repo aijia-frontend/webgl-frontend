@@ -15,7 +15,7 @@ import router from './router'
 import store from './store/'
 import { VueAxios } from './utils/request'
 import { Slider } from 'ant-design-vue'
-import eventBus from '@/common/eventBus.js'
+import eventBus from './common/eventBus.js'
 
 import bootstrap from './core/bootstrap'
 import './core/lazy_use'

@@ -1,4 +1,14 @@
 import BaseJig from '@/common/baseJig'
+import DataStore from '../models/dataStore'
+
+const cancelBubble = function (e) {
+  window.event ? window.event.cancelBubble = true : e.stopPropagation()
+}
+
+const stopDefault = function (e) {
+  if (e && e.preventDefault) { e.preventDefault() } else { window.event.returnValue = false }
+  return false
+}
 
 const Jig = BaseJig.extend({
   pageEvents: {
@@ -7,6 +17,7 @@ const Jig = BaseJig.extend({
 
   events: {
     'click': 'onClick',
+    'contextmenu': 'onRightClick',
     'mousedown': 'onMouseDown',
     'mousemove': 'onMouseMove',
     'mouseup': 'onMouseUp'
@@ -16,6 +27,8 @@ const Jig = BaseJig.extend({
     this.attrs = attrs
     this.drawing = attrs.drawing
     this.data = {}
+    this.dataStore = DataStore
+    this.tf = this.drawing.transform().clone()
     BaseJig.prototype.initialize.apply(this, arguments)
   },
 
@@ -38,16 +51,45 @@ const Jig = BaseJig.extend({
   },
 
   onClick () {},
+  onRightClick (e) {
+    cancelBubble()
+    stopDefault()
+  },
 
-  onMouseDown () {},
+  onMouseDown (e) {
+    if (e.button === 2) {
+      this.pan = true
+      this.panStart = this.getPosInView(e)
+      this.drawing.setCursor('pan')
+    }
+  },
 
-  onMouseMove () {},
+  onMouseMove (e) {
+    if (this.pan && this.panStart) {
+      const pos = this.getPosInView(e)
+      const offset = {
+        x: pos.x - this.panStart.x,
+        y: pos.y - this.panStart.y
+      }
+      const tf = this.tf.clone()
+      tf.translate(offset.x, offset.y)
+      this.drawing.transform(tf)
+    }
+  },
 
-  onMouseUp () {},
+  onMouseUp () {
+    this.pan = false
+    this.panStart = null
+    this.tf = this.drawing.transform().clone()
+    this.drawing.setCursor('cross')
+  },
 
-  updateCanvas () {},
-
-  getPosInView () {},
+  getPosInView (e) {
+    return this.drawing.posInView({
+      x: e.pageX,
+      y: e.pageY
+    })
+  },
 
   getPos (e) {
     const pos = this.drawing.posInContent({

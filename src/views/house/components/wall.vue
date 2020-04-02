@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import CST from '@/common/cst/index'
+import CST from '@/common/cst/main'
 import DataStore from '../models/dataStore'
 
 export default {

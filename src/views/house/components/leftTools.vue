@@ -52,7 +52,6 @@ export default {
       this.collapsed = !this.collapsed
     },
     cmdStart (cmd) {
-      console.log('======> cmdName:', cmd)
       // this.$bus.$on('start:' + cmd, this.buttonEnable.bind(this))
       // this.$bus.$on('end:' + cmd, this.cmdState.bind(this))
       // this.$bus.$on('cancel:' + cmd, this.cmdState.bind(this))

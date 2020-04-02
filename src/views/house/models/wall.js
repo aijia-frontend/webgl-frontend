@@ -1,5 +1,5 @@
 import Model from './model'
-import CST from '@/common/cst/index'
+import CST from '@/common/cst/main'
 import _cloneDeep from 'lodash/cloneDeep'
 
 const getPointsStr = pts => {

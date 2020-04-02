@@ -1,4 +1,3 @@
-import DPI from './dpi'
 import Unit from './unit'
 import './point'
 import './rect'
@@ -12,14 +11,6 @@ const CST = {
 
   toPhysical (data, options) {
     return Dispatch.invoke('toPhysical', data, options)
-  },
-
-  getDPI () {
-    return DPI.get()
-  },
-
-  setDPI (v) {
-    DPI.set(v)
   },
 
   mm: Unit.mm

@@ -3,9 +3,11 @@
     id="svg"
     width="100%"
     height="100%"
+    :cursor="cursor"
     @click="onClick"
     @mousewheel="onMouseWheel"
-    @contextmenu="onRightClick">
+    @mousedown.right="onRightClick"
+    @click.right.stop.prevent="onClick">
     <defs>
       <patternGroup id="grid-sym-minus-min" :pattern="patternMinusMin" :scale="scale"></patternGroup>
       <patternGroup id="grid-sym-minus" :pattern="patternMinus" :scale="scale"></patternGroup>
@@ -89,6 +91,7 @@ export default {
 
   data () {
     return {
+      cursor: 'arrow',
       pattern: {
         x: 0,
         y: 0,
@@ -165,6 +168,10 @@ export default {
     this.zoomExtend()
     Global.drawing = this
     this.load()
+
+    this.$bus.$on('start', this.cmdStart)
+    this.$bus.$on('cancel', this.cmdEnd)
+    this.$bus.$on('end', this.cmdEnd)
     // setTimeout(() => this.load(), 3000)
   },
 
@@ -224,6 +231,8 @@ export default {
     },
 
     getPosFromView (pt) {
+      const tf = this.transform().clone()
+      pt = Point.transform(pt, tf)
       const ctm = this.el.getScreenCTM()
       const pos = this.el.createSVGPoint()
       pos.x = pt.x
@@ -233,12 +242,16 @@ export default {
     },
 
     posInView (pt) {
+      // console.log('window 坐标：', pt)
       const ctm = this.el.getScreenCTM()
       const pos = this.el.createSVGPoint()
       pos.x = pt.x
       pos.y = pt.y
+      const _pos = pos.matrixTransform(ctm.inverse())
+      // console.log('视图 坐标：', _pos)
+      // console.log('window 坐标:', this.getPosFromView(_pos))
 
-      return pos.matrixTransform(ctm.inverse())
+      return _pos
     },
 
     posInContent (pt, options = { clasp: true }) { // 默认吸附
@@ -262,6 +275,10 @@ export default {
     },
 
     onClick (e) {
+      this.posInView({
+        x: e.pageX,
+        y: e.pageY
+      })
       // console.log('逻辑坐标：', CST.toLogical(this.posInContent({ x: e.pageX, y: e.pageY }), { tag: 'point', origin: this.origin }))
     },
 
@@ -292,9 +309,16 @@ export default {
     },
 
     onRightClick (e) {
-      console.log('rightClick')
-      e.preventDefault()
-      e.stopPropagation()
+      console.log(DataStore)
+      if (DataStore.activeCmd) return
+      this.$bus.$emit('pan', {
+        canvas: this.$el,
+        drawing: this,
+        startPos: this.posInView({
+          x: e.pageX,
+          y: e.pageY
+        })
+      })
     },
 
     transform (v) {
@@ -315,6 +339,12 @@ export default {
       this.transform(tf)
     },
 
+    pan (offset) {
+      const tf = this.transform().clone()
+      tf.translate(offset.x, offset.y)
+      this.transform(tf)
+    },
+
     addContainer (data) {
       // Object.assign(data.data, { parent: this.$refs.container })
       // DataStore.create(data)
@@ -323,11 +353,37 @@ export default {
 
     addTransient (node) {
       this.$refs.transient.addEntity(node)
+    },
+
+    cmdStart (cmd) {
+      const cursor = (cmd.name() === 'pan' ? 'pan' : 'cross')
+      this.setCursor(cursor)
+    },
+    cmdEnd () {
+      this.inputVisible = false
+      this.setCursor('arrow')
+    },
+    setCursor (cursor) {
+      this.cursor = cursor
+      return this
     }
   }
 }
 </script>
 <style scoped>
+  svg[cursor="arrow"] {
+    cursor: default;
+    /* cursor: url(../../../assets/cursor/selectCursor.png) 10 7, auto; */
+  }
+  svg[cursor="cross"] {
+    cursor: crosshair;
+    /* cursor: url(../../../assets/cursor/crossCursor.png) 24 24, auto; */
+  }
+  svg[cursor="pan"] {
+    cursor: grabbing;
+    /* cursor: url(../../../assets/cursor/panCursor.png) 16 8, auto; */
+  }
+
   svg line,
   svg polyline,
   svg rect,
@@ -344,8 +400,13 @@ export default {
     stroke: #Dc143C !important;
   }
 
-  svg .wall {
+/*   svg .wall {
     fill: url() !important;
+  } */
+
+  #canvas svg rect.bg-fill {
+    stroke: #212830;
+    fill: #000000;
   }
   svg rect.boundary-bg {
     /* fill: #236 !important; */

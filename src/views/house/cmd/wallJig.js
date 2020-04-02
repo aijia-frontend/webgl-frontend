@@ -5,7 +5,7 @@ import { Point } from '@/common/geometry'
 import Matrix from '@/common/matrix'
 import CST from '@/common/cst/main'
 // import _cloneDeep from 'lodash/cloneDeep'
-import PreViewBuilder from './previewBuilder'
+// import PreViewBuilder from './previewBuilder'
 const wallWeight = 140 // mm
 
 const polygon = {
@@ -76,11 +76,17 @@ const wallJig = Jig.extend({
   update (pos) {
     SvgRenderer.attr(this.preview.line, { points: getPointsStr([this.startPos, pos]) })
     this.updateWall(pos)
-    if (this.dimension) this.dimension.remove()
-    if (CST.mm.toLogical(Point.distance(this.startPos, pos)) >= wallWeight) {
-      this.dimension = PreViewBuilder.dimension(this.startPos, pos)
-      this.drawing.addTransient(this.dimension)
+    const options = {
+      tag: 'point',
+      origin: this.dataStore.origin
     }
+    const startL = CST.toLogical(this.points[1], options)
+    const endL = CST.toLogical(this.points[2], options)
+    this.$bus.$emit('dimension', {
+      pos: this.drawing.getPosFromView(Point.paramPoint(this.points[1], this.points[2], 0.5)),
+      length: Point.distance(startL, endL),
+      wallWeight
+    })
   },
 
   updateWall (pos) {

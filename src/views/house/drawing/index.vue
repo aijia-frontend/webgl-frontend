@@ -1,8 +1,7 @@
 <template>
   <div id="page">
-    <div id="dpi"></div>
     <div id="canvas">
-      <drawing :cursor="cursor"></drawing>
+      <drawing></drawing>
     </div>
     <div id="left">
       <leftTools style="z-index:99"></leftTools>
@@ -11,11 +10,12 @@
     <div
       class="dimension"
       :style="{top: top, left: left, width: '100px'}"
-      :class="{ hide: !inputVisible }">
+      v-show="inputVisible">
       <a-input
         ref="inputNumber"
         v-model="length"
         :autoFocus="true"
+        :disabled="true"
         type="number"
         suffix="mm"
         size="small"
@@ -36,8 +36,7 @@ export default {
   name: 'Drawing',
   data () {
     return {
-      cursor: 'cross',
-      inputVisible: true,
+      inputVisible: false,
       top: '0px',
       left: '0px',
       length: 0
@@ -48,9 +47,23 @@ export default {
     leftTools
   },
   mounted () {
+    this.$bus.$on('dimension', this.onDimension)
+    this.$bus.$on('cancel', this.cmdEnd)
+    this.$bus.$on('end', this.cmdEnd)
   },
   methods: {
-    onPressEnter () {}
+    onDimension (data) {
+      this.top = (data.pos.y - 64 - 12) + 'px'
+      this.left = (data.pos.x - 0 - 50) + 'px'
+      this.length = data.length
+      this.inputVisible = data.length >= data.wallWeight
+    },
+    onPressEnter () {
+      this.inputVisible = false
+    },
+    cmdEnd () {
+      this.inputVisible = false
+    }
   }
 }
 </script>
@@ -79,13 +92,6 @@ export default {
     background-color: #ffffff;
     border: 1px solid #D3D3D3;
   }
-  #dpi {
-    position: absolute;
-    top: -100%;
-    left: -100%;
-    width: 1in;
-    height: 1in;
-  }
   #canvas {
     position: absolute;
     top: 0px;
@@ -93,24 +99,7 @@ export default {
     width: 100%;
     height: 100%;
   }
-  #canvas svg[cursor="arrow"] {
-    cursor: url(../../../assets/cursor/selectCursor.png) 10 7, auto;
-  }
-
-  #canvas svg[cursor="cross"] {
-    cursor: crosshair;
-    /* cursor: url(../../../assets/cursor/crossCursor.png) 24 24, auto; */
-  }
-
-  #canvas svg[cursor="pan"] {
-    cursor: url(../../../assets/cursor/panCursor.png) 16 8, auto;
-  }
-  #canvas svg rect.bg-fill {
-    stroke: #212830;
-    fill: #000000;
-  }
-
   .dimension {
-    position: absolute !important
+    position: absolute !important;
   }
 </style>

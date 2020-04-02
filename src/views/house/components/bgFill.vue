@@ -4,7 +4,7 @@
 
 <script>
 import DataStore from '../models/dataStore'
-import CST from '@/common/cst/index'
+import CST from '@/common/cst/main'
 export default {
   name: 'BgFill',
 
