@@ -15,7 +15,6 @@ new Vue({
 
   watch: {
     activeCmd: function (cmd) {
-      console.log(Global.activeCmd)
       Global.activeCmd = cmd
     }
   },

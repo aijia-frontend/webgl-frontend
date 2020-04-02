@@ -1,12 +1,12 @@
 import Jig from './baseJig'
 import SvgRenderer from '@/common/renderTools'
 import Vector from '@/common/vector'
-import { Point, Line } from '@/common/geometry'
+import { Point } from '@/common/geometry'
 import Matrix from '@/common/matrix'
 import CST from '@/common/cst/main'
 // import _cloneDeep from 'lodash/cloneDeep'
-// import PreViewBuilder from './previewBuilder'
-const wallWeight = 200 // mm
+import PreViewBuilder from './previewBuilder'
+const wallWeight = 140 // mm
 
 const polygon = {
   tag: 'polygon',
@@ -76,6 +76,11 @@ const wallJig = Jig.extend({
   update (pos) {
     SvgRenderer.attr(this.preview.line, { points: getPointsStr([this.startPos, pos]) })
     this.updateWall(pos)
+    if (this.dimension) this.dimension.remove()
+    if (CST.mm.toLogical(Point.distance(this.startPos, pos)) >= wallWeight) {
+      this.dimension = PreViewBuilder.dimension(this.startPos, pos)
+      this.drawing.addTransient(this.dimension)
+    }
   },
 
   updateWall (pos) {
@@ -111,14 +116,6 @@ const wallJig = Jig.extend({
       this.data.startPos = this.startPos
       this.data.endPos = pos
       this.end()
-      /* this.preview.line.remove()
-      if (this.lastPreview) {
-        this.updatePrePreView()
-      } */
-      // re new
-      /* this.lastPreview = _cloneDeep(this.preview)
-      this.prepare()
-      this.startPos = pos */
     }
   },
 
@@ -127,34 +124,6 @@ const wallJig = Jig.extend({
     if (!this.startPos) return
     const pos = this.getPos(e)
     this.update(pos)
-  },
-
-  updatePrePreView () {
-    console.log('last preview:', this.lastPreview)
-    const lastPoints = this.lastPreview.wall.points
-    const currentPoints = this.preview.wall.points
-    const l1 = new Line(lastPoints[1], lastPoints[2])
-    const l2 = new Line(lastPoints[4], lastPoints[5])
-    const c1 = new Line(currentPoints[1], currentPoints[2])
-    const c2 = new Line(currentPoints[4], currentPoints[5])
-
-    const intersect1 = Line.intersect(l1, c1, { extend: true })
-    const intersect2 = Line.intersect(l2, c2, { extend: true })
-    if (intersect1) {
-      lastPoints[2].x = currentPoints[1].x = intersect1.point.x
-      lastPoints[2].y = currentPoints[1].y = intersect1.point.y
-    }
-    if (intersect2) {
-      lastPoints[4].x = currentPoints[5].x = intersect2.point.x
-      lastPoints[4].y = currentPoints[5].y = intersect2.point.y
-    }
-    if (!intersect1 && !intersect2) {
-      // 2 wall need merge
-      currentPoints[0] = lastPoints[0]
-      currentPoints[1] = lastPoints[1]
-      currentPoints[5] = lastPoints[5]
-      this.lastPreview.wall.remove()
-    }
   }
 })
 

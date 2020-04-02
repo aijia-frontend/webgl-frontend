@@ -14,9 +14,9 @@
       :y1="item * pattern.height / 5"
       :y2="item * pattern.height / 5"
       class="h"
-      stroke="#ffffff"
-      stroke-opacity="0.3"
-      :stroke-width="1 / scale"/>
+      stroke="#E8E9EE"
+      stroke-opacity="0.6"
+      :stroke-width="1.5 / scale"/>
     <line
       v-for="item in size"
       :key="id + 'v' + item"
@@ -25,15 +25,15 @@
       :x1="item * pattern.width / 5"
       :x2="item * pattern.width / 5"
       class="v"
-      stroke="#ffffff"
-      stroke-opacity="0.3"
-      :stroke-width="1 / scale"/>
+      stroke="#E8E9EE"
+      stroke-opacity="0.6"
+      :stroke-width="1.5 / scale"/>
     <line
       x1="0"
       y1="0"
       :x2="pattern.width"
       y2="0"
-      stroke="#ffffff"
+      stroke="#DCDCE1"
       stroke-opacity="0.6"
       :stroke-width="2 / scale"/>
     <line
@@ -41,7 +41,7 @@
       y1="0"
       x2="0"
       :y2="pattern.height"
-      stroke="#ffffff"
+      stroke="#DCDCE1"
       stroke-opacity="0.6"
       :stroke-width="2 / scale"/>
     <line />

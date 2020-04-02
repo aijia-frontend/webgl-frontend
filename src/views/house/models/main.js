@@ -7,7 +7,6 @@ import wall from './wall'
 // Vue.mixin({
 //   DataStore,
 // })
-console.log(wall, wall.type)
 const registry = [wall]
 
 Factory.regist(registry)

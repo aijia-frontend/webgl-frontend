@@ -9,7 +9,16 @@ const getPointsStr = pts => {
 const Wall = Model.extend({
   initialize () {
     this.type = 'wall'
+    this.isActive = false
     Model.prototype.initialize.apply(this, arguments)
+  },
+
+  start () {
+    return this.attrs.points[0]
+  },
+
+  end () {
+    return this.attrs.points[3]
   },
 
   points () {
@@ -26,32 +35,11 @@ const Wall = Model.extend({
   },
 
   toJSON () {
-    const json = {
-      tag: 'g',
-      attrs: {
-        uid: this.uid,
-        class: 'wall'
-      },
-      nodes: []
-    }
-
-    json.nodes.push(this.buildContent())
+    // save data
+    const json = {}
 
     return json
-  },
-
-  buildContent () {
-    const points = this.attrs.points.map(pt => CST.toPhysical(pt, { tag: 'point', origin: this.origin }))
-
-    return {
-      tag: 'polygon',
-      attrs: {
-        points: getPointsStr(points)
-      }
-    }
-  },
-
-  buildGrips () {}
+  }
 })
 
 Wall.type = 'wall'

@@ -12,6 +12,7 @@
       <patternGroup id="grid-sym" :pattern="pattern" :scale="scale"></patternGroup>
       <patternGroup id="grid-sym-plus" :pattern="patternPlus" :scale="scale"></patternGroup>
       <wallFill></wallFill>
+      <grips></grips>
     </defs>
     <g class="background">
       <rect class="bg-color" width="100%" hight="100%"/>
@@ -61,6 +62,7 @@
 <script>
 import patternGroup from './patternGroup'
 import wallFill from './wallFill'
+import grips from './grips'
 import container from './container'
 import transient from './transient'
 
@@ -80,7 +82,7 @@ const boundary = {
   height: 8000
 }
 const space = 100 // space = 500mm
-const defaultGidSpace = 100 // mm
+const defaultGidSpace = 20 // mm
 
 export default {
   name: 'Drawing',
@@ -127,28 +129,29 @@ export default {
   components: {
     patternGroup,
     wallFill,
+    grips,
     container,
     transient
   },
 
   watch: {
     tf: function (newV, oldV) {
-      console.log('==============>change', newV)
+      // console.log('==============>change', newV)
       if (newV.a <= 0.2) {
         this.bgFill = 'grid-sym-plus'
-        // this.defaultGidSpace = 500
+        // this.defaultGidSpace = 100
       } else if (newV.a <= 1) {
         this.bgFill = 'grid-sym'
-        // this.defaultGidSpace = 500
+        // this.defaultGidSpace = 20
       } else if (newV.a <= 5) {
         this.bgFill = 'grid-sym-minus'
-        // this.defaultGidSpace = 100
+        // this.defaultGidSpace = 20
       } else {
         this.bgFill = 'grid-sym-minus-min'
         // this.defaultGidSpace = 20
       }
       this.scale = newV.a
-      console.log('缩放倍数：', newV.a)
+      // console.log('缩放倍数：', newV.a)
     }
   },
 
@@ -220,6 +223,15 @@ export default {
       // this.addContainer(model.$el)
     },
 
+    getPosFromView (pt) {
+      const ctm = this.el.getScreenCTM()
+      const pos = this.el.createSVGPoint()
+      pos.x = pt.x
+      pos.y = pt.y
+
+      return pos.matrixTransform(ctm)
+    },
+
     posInView (pt) {
       const ctm = this.el.getScreenCTM()
       const pos = this.el.createSVGPoint()
@@ -250,7 +262,7 @@ export default {
     },
 
     onClick (e) {
-      console.log('逻辑坐标：', CST.toLogical(this.posInContent({ x: e.pageX, y: e.pageY }), { tag: 'point', origin: this.origin }))
+      // console.log('逻辑坐标：', CST.toLogical(this.posInContent({ x: e.pageX, y: e.pageY }), { tag: 'point', origin: this.origin }))
     },
 
     onMouseWheel (e) {
@@ -268,11 +280,11 @@ export default {
         .scale(factor, factor)
         .translate(pos.x, pos.y)
       if (tf.a <= 0.01) {
-        console.log('can not zoom out')
+        console.log('can not zoom out. scale:', this.tf.a)
         return
       }
-      if (tf.a >= 0.1) {
-        console.log('can not zoom in')
+      if (tf.a >= 20) {
+        console.log('can not zoom in. scale:', this.tf.a)
         return
       }
 
@@ -295,7 +307,7 @@ export default {
       const width = boundary.width * pxPerMM
       const height = boundary.height * pxPerMM
       const scale = Math.min(this.origin.x * 2 / width, this.origin.y * 2 / height) * 0.8
-      console.log('scale:', scale)
+      // console.log('scale:', scale)
       const tf = Matrix.identity()
       tf.translate(-this.origin.x, -this.origin.y)
       tf.scale(scale, scale)
@@ -317,15 +329,11 @@ export default {
 </script>
 <style scoped>
   svg line,
-  svg circle,
   svg polyline,
   svg rect,
-  svg path,
-  svg polygon,
-  svg ellipse {
+  svg polygon {
     vector-effect: non-scaling-stroke;
     fill: none;
-    stroke: #ffffff;
     stroke-width: 1px;
   }
   svg .ucs-h {
@@ -340,7 +348,8 @@ export default {
     fill: url() !important;
   }
   svg rect.boundary-bg {
-    fill: #236 !important;
+    /* fill: #236 !important; */
+    fill: #F1F3F8 !important;
   }
   svg rect.bg-color {
     fill: #F0F4F5 !important;

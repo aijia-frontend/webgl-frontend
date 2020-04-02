@@ -27,8 +27,6 @@ _extend(Model.prototype, vue, {
   },
 
   onChange () {
-    // this.$el.remove()
-    // this.render()
   },
 
   render () {

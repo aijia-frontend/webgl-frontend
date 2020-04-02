@@ -15,18 +15,9 @@ export default {
     walls,
     wall
   },
-  // props: ['lines'],
   data () {
     return {
       walls: []
-    }
-  },
-  watch: {
-    walls: {
-      handler (newV, old) {
-        console.log(newV, old)
-      },
-      deep: true
     }
   },
   created () {

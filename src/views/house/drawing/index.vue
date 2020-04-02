@@ -4,8 +4,25 @@
     <div id="canvas">
       <drawing :cursor="cursor"></drawing>
     </div>
-    <leftTools style="z-index:99"></leftTools>
+    <div id="left">
+      <leftTools style="z-index:99"></leftTools>
+    </div>
     <div id="footer"></div>
+    <div
+      class="dimension"
+      :style="{top: top, left: left, width: '100px'}"
+      :class="{ hide: !inputVisible }">
+      <a-input
+        ref="inputNumber"
+        v-model="length"
+        :autoFocus="true"
+        type="number"
+        suffix="mm"
+        size="small"
+        @pressEnter="onPressEnter"
+        @blur="onPressEnter"
+      />
+    </div>
   </div>
 </template>
 
@@ -20,7 +37,10 @@ export default {
   data () {
     return {
       cursor: 'cross',
-      origin: {}
+      inputVisible: true,
+      top: '0px',
+      left: '0px',
+      length: 0
     }
   },
   components: {
@@ -28,6 +48,9 @@ export default {
     leftTools
   },
   mounted () {
+  },
+  methods: {
+    onPressEnter () {}
   }
 }
 </script>
@@ -41,14 +64,12 @@ export default {
       right: 0;
       overflow: hidden;
   }
-  #left-tools {
+  #left {
     position: absolute;
     top: 0px;
-    left: 0;
-    width: 200px;
+    left: 0px;
     height: calc(100% - 30px);
-    background-color: #ffffff;
-    border: 1px solid #D3D3D3
+    pointer-events: none;
   }
   #footer {
     position: absolute;
@@ -77,7 +98,8 @@ export default {
   }
 
   #canvas svg[cursor="cross"] {
-    cursor: url(../../../assets/cursor/crossCursor.png) 24 24, auto;
+    cursor: crosshair;
+    /* cursor: url(../../../assets/cursor/crossCursor.png) 24 24, auto; */
   }
 
   #canvas svg[cursor="pan"] {
@@ -86,5 +108,9 @@ export default {
   #canvas svg rect.bg-fill {
     stroke: #212830;
     fill: #000000;
+  }
+
+  .dimension {
+    position: absolute !important
   }
 </style>

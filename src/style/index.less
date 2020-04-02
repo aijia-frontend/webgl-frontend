@@ -6,17 +6,35 @@ svg .container rect {
   stroke: #ffffff;
   fill: #96969B;
   stroke-width: 2px;
+  stroke-linejoin: round;
+}
+
+svg .wall polygon {
+  stroke: none;
+  // stroke: #333333;
+  stroke-width: 1mm;
+}
+svg .wall polygon:hover {
+  cursor: move;
+  fill: #a8ceec;
+  stroke-width: 1mm;
+  stroke: #257ab9
 }
 
 svg .transient .wall {
-  fill: #96969B;
-  stroke: #ffffff;
-  stroke-width: 4px;
+  fill: #b0d0eb;
+  fill-opacity: 0.8;
+  stroke: #4b9db6;
+  stroke-width: 4mm;
 }
 
 svg .transient polyline.wallLine {
   stroke-dasharray: 10;
   stroke: #87CEFA;
-  stroke-width: 1px;
+  stroke-width: 1mm;
   vector-effect: non-scaling-stroke;
+}
+
+svg .transient * {
+  pointer-events: none;
 }

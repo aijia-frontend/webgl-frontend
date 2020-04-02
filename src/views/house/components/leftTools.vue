@@ -69,8 +69,6 @@ export default {
 </script>
 <style scoped>
   .leftTools {
-    /* background-color: rgba(255,255,255,1) !important; */
-    width: 256px !important;
-    /* height: calc(100% - 30px) !important; */
+    pointer-events: auto;
   }
 </style>

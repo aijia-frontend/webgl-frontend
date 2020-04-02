@@ -5,10 +5,8 @@ import _first from 'lodash/first'
 
 const NewWallHandler = BaseHandler.extend({
   initialize (attrs, options) {
-    console.log(DataStore)
-
     this.walls = DataStore.walls
-    console.log('====>dataStore walls:', this.walls)
+    // console.log('====>dataStore walls:', this.walls)
     BaseHandler.prototype.initialize.apply(this, arguments)
   },
 
@@ -30,7 +28,7 @@ const NewWallHandler = BaseHandler.extend({
       const intersect = PolyLine.intersect(new PolyLine(points1), new PolyLine(points))
       return intersect.length
     })
-    console.log('intersect Walls:', this.intersectingWalls)
+    // console.log('intersect Walls:', this.intersectingWalls)
   },
 
   handlerWalls () {
@@ -77,8 +75,18 @@ const NewWallHandler = BaseHandler.extend({
     if (intersect2) {
       points1[4] = points2[5] = intersect2.point
     }
+
+    DataStore.update([{
+      uid: wall1.uid,
+      points: points1
+    }, {
+      uid: wall2.uid,
+      points: points2
+    }])
+    // setTimeout(() => {
     wall1.update({ points: points1 })
     wall2.update({ points: points2 })
+    // }, 3000)
   },
 
   createWall (data) {
