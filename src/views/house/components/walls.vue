@@ -13,13 +13,12 @@
 <script>
 import DataStore from '../models/dataStore'
 export default {
-  name: 'walls',
+  name: 'Walls',
   components: {
   },
   data () {
     return {
-      walls: [],
-      isActive: false
+      walls: []
     }
   },
   computed: {},

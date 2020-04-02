@@ -22,7 +22,7 @@ _extend(Model.prototype, vue, {
   },
 
   update (data, options = { silent: false }) {
-    Object.assign(this.attrs, data)
+    this.attrs = Object.assign({}, this.attrs, data)
     if (!options.silent) this.onChange()
   },
 
