@@ -61,6 +61,7 @@ const Jig = BaseJig.extend({
       this.pan = true
       this.panStart = this.getPosInView(e)
       this.drawing.setCursor('pan')
+      this.tf = this.drawing.transform().clone()
     }
   },
 
@@ -80,7 +81,6 @@ const Jig = BaseJig.extend({
   onMouseUp () {
     this.pan = false
     this.panStart = null
-    this.tf = this.drawing.transform().clone()
     this.drawing.setCursor('cross')
   },
 

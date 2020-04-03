@@ -9,7 +9,6 @@ const getPointsStr = pts => {
 const Wall = Model.extend({
   initialize () {
     this.type = 'wall'
-    this.isActive = false
     Model.prototype.initialize.apply(this, arguments)
   },
 

@@ -1,7 +1,6 @@
 <template>
-  <g class="wall">
+  <g class="wall" :class="{ active: isActive }">
     <polygon
-      :class="{ active: isActive }"
       :points="pointsStr"
       @click="onClick"></polygon>
     <use :x="start.x" :y="start.y" xlink:href="#wall-end"></use>
@@ -43,7 +42,7 @@ export default {
           origin: DataStore.origin
         }
         this.pointsStr = this.wall.pointsStr()
-        this.isActive = this.wall.isActive
+        this.isActive = this.wall.attrs.isActive
         this.start = CST.toPhysical(this.wall.start(), options)
         this.end = CST.toPhysical(this.wall.end(), options)
       },
@@ -52,11 +51,12 @@ export default {
     }
   },
   mounted () {
-    // console.log(this)
+    this.wall.$view = this
   },
   methods: {
     onClick () {
       console.log('click wall:===>cmd:scoot wall')
+      DataStore.addSelected(this.wall)
     }
   }
 }

@@ -13,7 +13,9 @@ const DataStore = new Vue({
     },
     origin: null,
     activeCmd: null,
-    nodes: [],
+    drawing: null,
+    selectedEnts: [],
+    ents: [],
     walls: []
   },
 
@@ -24,23 +26,49 @@ const DataStore = new Vue({
   },
 
   methods: {
-    newEntity (data) {},
-    getWalls () {
-      return this.nodes.filter(item => item.type === 'wall')
+    addSelected (ent) { // ent:{uid，data: {isActived}}
+      if (Array.isArray(ent)) {
+        ent.forEach(item => this.addSelected(item))
+      } else if (_isObject(ent)) {
+        const index = _findIndex(this.selectedEnts, item => item.uid === ent.uid)
+        if (index >= 0) return
+        this.selectedEnts.push(ent)
+        this.update({
+          ent,
+          isActive: true
+        })
+      }
     },
+
+    remSelected (ent) {
+      if (Array.isArray(ent)) {
+        ent.forEach(item => this.remSelected(item))
+      } else if (_isObject(ent)) {
+        const index = _findIndex(this.selectedEnts, item => item.uid === ent.uid)
+        if (index < 0) return
+        this.selectedEnts.splice(index, 1)
+        this.update({
+          ent,
+          isActive: false
+        })
+      }
+    },
+
     update (data) {
       if (Array.isArray(data)) {
         data.forEach(item => this.update(item))
       } else if (_isObject(data)) {
-        const index = _findIndex(this.walls, (wall) => wall.uid === data.uid)
+        const type = data.ent.type + 's'
+        const index = _findIndex(this[type], (ent) => ent.uid === data.ent.uid)
         if (index < 0) {
-          console.warn('can not find this wall. uid: ', data.uid)
+          console.warn('can not find this ent. uid: ', data.uid)
           return
         }
-        const wall = _cloneDeep(this.walls[index])
-        delete data.uid
-        wall.update(data)
-        this.$set(this.walls, index, wall)
+        const ent = _cloneDeep(this[type][index])
+        delete data.ent
+        ent.update(data)
+        this.$set(this[type], index, ent)
+        this[type][index].update(data)
       }
     },
     destroy (data) {
@@ -53,8 +81,10 @@ const DataStore = new Vue({
       if (_isObject(data)) {
         // this.newEntity(data)
         const model = Factory.create(data)
-        this[model.type + 's'].push(model)
-        this.nodes.push(model)
+        const type = model.type + 's'
+        if (!this[type]) this[type] = []
+        this[type].push(model)
+        this.ents.push(model)
         return model
       }
     }

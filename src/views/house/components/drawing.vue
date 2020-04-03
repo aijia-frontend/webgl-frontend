@@ -71,9 +71,8 @@ import transient from './transient'
 import CST from '@/common/cst/main'
 import { Point } from '@/common/geometry'
 import Matrix from '@/common/matrix'
-import Global from '@/common/global'
-// import DataStore from '@/common/dataStore'
 import DataStore from '../models/dataStore'
+import KeyCode from '@/common/util/keyCode'
 
 const page = {
   width: 160000, // 160000(mm) 160m
@@ -166,13 +165,14 @@ export default {
     this.calcPattern()
     this.defaultGidSpace = defaultGidSpace
     this.zoomExtend()
-    Global.drawing = this
+    DataStore.drawing = this
     this.load()
 
     this.$bus.$on('start', this.cmdStart)
     this.$bus.$on('cancel', this.cmdEnd)
     this.$bus.$on('end', this.cmdEnd)
     // setTimeout(() => this.load(), 3000)
+    document.addEventListener('keydown', this.onKeyDown)
   },
 
   methods: {
@@ -309,7 +309,6 @@ export default {
     },
 
     onRightClick (e) {
-      console.log(DataStore)
       if (DataStore.activeCmd) return
       this.$bus.$emit('pan', {
         canvas: this.$el,
@@ -319,6 +318,25 @@ export default {
           y: e.pageY
         })
       })
+    },
+
+    onKeyDown (e) {
+      if (DataStore.activeCmd) return
+      const keyCode = e.charCode ? e.charCode : e.keyCode
+      switch (keyCode) {
+        case KeyCode.DEL: {
+          console.log('删除：')
+          console.log(DataStore.selectedEnts)
+          break
+        }
+        case KeyCode.ESC: {
+          console.log('取消选择：')
+          DataStore.remSelected(DataStore.ents.filter(item => item.attrs.isActive))
+          break
+        }
+        default:
+          break
+      }
     },
 
     transform (v) {

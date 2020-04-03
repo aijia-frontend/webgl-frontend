@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import Global from '@/common/global'
+import DataStore from '../models/dataStore'
 export default {
   data () {
     return {
@@ -60,7 +60,7 @@ export default {
       this.$bus.$emit(cmd, {
         // app: this.app,
         canvas: document.getElementById('svg'),
-        drawing: Global.drawing
+        drawing: DataStore.drawing
       })
     }
   }

@@ -27,6 +27,10 @@ _extend(Model.prototype, vue, {
   },
 
   onChange () {
+    if (this.$view) {
+      this.$view.wall = this
+      this.$view.$nextTick()
+    }
   },
 
   render () {

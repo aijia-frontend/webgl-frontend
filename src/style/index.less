@@ -14,11 +14,22 @@ svg .wall polygon {
   // stroke: #333333;
   stroke-width: 1mm;
 }
+svg .wall use {
+  display: none;
+}
 svg .wall polygon:hover {
   cursor: move;
   fill: #a8ceec;
   stroke-width: 1mm;
-  stroke: #257ab9
+  stroke: #257ab9;
+}
+svg .wall.active polygon {
+  fill: #a8ceec;
+  stroke-width: 1mm;
+  stroke: #257ab9;
+}
+svg .wall.active use {
+  display: inline;
 }
 
 svg .transient .wall {

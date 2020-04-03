@@ -77,15 +77,15 @@ const NewWallHandler = BaseHandler.extend({
     }
 
     DataStore.update([{
-      uid: wall1.uid,
+      ent: wall1,
       points: points1
     }, {
-      uid: wall2.uid,
+      ent: wall2,
       points: points2
     }])
     // setTimeout(() => {
-    wall1.update({ points: points1 })
-    wall2.update({ points: points2 })
+    // wall1.update({ points: points1 })
+    // wall2.update({ points: points2 })
     // }, 3000)
   },
 
