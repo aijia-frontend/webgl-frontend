@@ -326,12 +326,17 @@ export default {
       switch (keyCode) {
         case KeyCode.DEL: {
           console.log('删除：')
-          console.log(DataStore.selectedEnts)
+          // console.log(DataStore.selectedEnts)
+          this.$bus.$emit('destroy', {
+            drawing: this,
+            ents: DataStore.selectedEnts
+          })
+
           break
         }
         case KeyCode.ESC: {
           console.log('取消选择：')
-          DataStore.remSelected(DataStore.ents.filter(item => item.attrs.isActive))
+          DataStore.remSelected(DataStore.selectedEnts)
           break
         }
         default:

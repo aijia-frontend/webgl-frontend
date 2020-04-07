@@ -36,7 +36,7 @@ export default {
   },
   watch: {
     wall: {
-      handler () {
+      handler (newV, old) {
         const options = {
           tag: 'point',
           origin: DataStore.origin
@@ -51,10 +51,11 @@ export default {
     }
   },
   mounted () {
-    this.wall.$view = this
+    // this.wall.$view = this
   },
   methods: {
     onClick () {
+      if (DataStore.activeCmd) return
       console.log('click wall:===>cmd:scoot wall')
       DataStore.addSelected(this.wall)
     }

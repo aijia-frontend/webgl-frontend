@@ -21,9 +21,17 @@ _extend(Model.prototype, vue, {
     // if (this.parent) this.render()
   },
 
+  getRefEnt (uid) {
+    return DataStore.get(uid)
+  },
+
   update (data, options = { silent: false }) {
     this.attrs = Object.assign({}, this.attrs, data)
     if (!options.silent) this.onChange()
+  },
+
+  destroy () {
+    this._isDestroyed = true
   },
 
   onChange () {

@@ -78,7 +78,8 @@ const Jig = BaseJig.extend({
     }
   },
 
-  onMouseUp () {
+  onMouseUp (e) {
+    if (!this.pan) return
     this.pan = false
     this.panStart = null
     this.drawing.setCursor('cross')

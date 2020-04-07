@@ -2,6 +2,7 @@ import BaseHandler from './baseHandler'
 import DataStore from '../models/dataStore'
 import { Point, Line, PolyLine } from '@/common/geometry'
 import _first from 'lodash/first'
+import NewJointHandler from './newJointHandler'
 
 const NewWallHandler = BaseHandler.extend({
   initialize (attrs, options) {
@@ -76,6 +77,10 @@ const NewWallHandler = BaseHandler.extend({
       points1[4] = points2[5] = intersect2.point
     }
 
+    this.createJoint({
+      position: points1[3],
+      walls: [wall1, wall2]
+    })
     DataStore.update([{
       ent: wall1,
       points: points1
@@ -84,9 +89,14 @@ const NewWallHandler = BaseHandler.extend({
       points: points2
     }])
     // setTimeout(() => {
-    // wall1.update({ points: points1 })
-    // wall2.update({ points: points2 })
+    wall1.update({ points: points1 })
+    wall2.update({ points: points2 })
     // }, 3000)
+  },
+
+  createJoint (data) {
+    const newJointHandler = new NewJointHandler(this.attrs)
+    return newJointHandler.run(data)
   },
 
   createWall (data) {

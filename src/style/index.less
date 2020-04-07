@@ -1,7 +1,8 @@
 svg .container line,
 svg .container polyline,
 svg .container polygon,
-svg .container rect {
+svg .container rect,
+svg .container circle {
   vector-effect: non-scaling-stroke;
   stroke: #ffffff;
   fill: #96969B;
@@ -17,19 +18,27 @@ svg .wall polygon {
 svg .wall use {
   display: none;
 }
-svg .wall polygon:hover {
-  cursor: move;
+svg[cursor="arrow"] .wall:not(.active) polygon:hover {
   fill: #a8ceec;
-  stroke-width: 1mm;
+  fill-opacity: 0.5;
+  stroke-width: 2px;
   stroke: #257ab9;
 }
 svg .wall.active polygon {
   fill: #a8ceec;
-  stroke-width: 1mm;
+  stroke-width: 2px;
   stroke: #257ab9;
 }
 svg .wall.active use {
   display: inline;
+}
+
+svg[cursor="arrow"] .joint circle:hover {
+  cursor: move;
+  fill: #257ab9;
+}
+svg .joint.active circle {
+  fill: #257ab9
 }
 
 svg .transient .wall {

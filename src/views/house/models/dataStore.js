@@ -16,7 +16,8 @@ const DataStore = new Vue({
     drawing: null,
     selectedEnts: [],
     ents: [],
-    walls: []
+    walls: [],
+    joints: []
   },
 
   watch: {
@@ -26,12 +27,16 @@ const DataStore = new Vue({
   },
 
   methods: {
-    addSelected (ent) { // ent:{uid，data: {isActived}}
+    get (uid) {
+      return this.ents.find(item => item.uid === uid)
+    },
+    addSelected (ent) { // ent:{uid，data: {isActived}}: //just one allowed
       if (Array.isArray(ent)) {
         ent.forEach(item => this.addSelected(item))
       } else if (_isObject(ent)) {
-        const index = _findIndex(this.selectedEnts, item => item.uid === ent.uid)
-        if (index >= 0) return
+        if (this.selectedEnts.length) this.remSelected(this.selectedEnts)
+        /* const index = _findIndex(this.selectedEnts, item => item.uid === ent.uid)
+        if (index >= 0) return */
         this.selectedEnts.push(ent)
         this.update({
           ent,
@@ -42,6 +47,12 @@ const DataStore = new Vue({
 
     remSelected (ent) {
       if (Array.isArray(ent)) {
+        ent = ent.map(item => {
+          return {
+            type: item.type,
+            uid: item.uid
+          }
+        })
         ent.forEach(item => this.remSelected(item))
       } else if (_isObject(ent)) {
         const index = _findIndex(this.selectedEnts, item => item.uid === ent.uid)
@@ -69,11 +80,35 @@ const DataStore = new Vue({
         ent.update(data)
         this.$set(this[type], index, ent)
         this[type][index].update(data)
+
+        const index2 = _findIndex(this.ents, item => item.uid === ent.uid)
+        if (index2 > -1) this.ents[index2] = ent
       }
     },
-    destroy (data) {
-      //
+
+    destroy (ent) {
+      if (Array.isArray(ent)) {
+        ent = ent.map(item => {
+          return {
+            type: item.type,
+            uid: item.uid
+          }
+        })
+        this.remSelected(ent)
+        ent.forEach(item => this.destroy(item))
+      } else if (_isObject(ent)) {
+        const type = ent.type + 's'
+        const index = _findIndex(this[type], (item) => item.uid === ent.uid)
+        if (index < 0) {
+          console.warn('can not find this ent. uid: ', ent.uid)
+          return
+        }
+        this[type].splice(index, 1)
+        const index2 = _findIndex(this.ents, item => item.uid === ent.uid)
+        if (index2 > -1) this.ents.splice(index2, 1)
+      }
     },
+
     create (data) {
       if (Array.isArray(data)) {
         data.forEach(item => this.create(item))

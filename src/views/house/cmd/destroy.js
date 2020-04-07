@@ -1,4 +1,5 @@
-import BaseCmd from '../common/baseCmd'
+import BaseCmd from '@/common/baseCmd'
+import DestroyHandler from '../handler/destroyHandler'
 
 const Destroy = BaseCmd.extend({
   initialize (attrs, options) {
@@ -6,13 +7,18 @@ const Destroy = BaseCmd.extend({
     BaseCmd.prototype.initialize.apply(this, arguments)
   },
 
-  execute () {},
+  execute () {
+    this.onStart()
+    this.onEnd()
+  },
 
   onStart () {
     BaseCmd.prototype.onStart.apply(this, arguments)
   },
 
   onEnd () {
+    const destroyHandler = new DestroyHandler(this.attrs)
+    destroyHandler.run(this.attrs.ents)
     BaseCmd.prototype.onEnd.apply(this, arguments)
   }
 })

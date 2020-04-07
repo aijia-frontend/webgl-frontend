@@ -2,6 +2,7 @@
 import { each as _each } from 'lodash'
 import DataStore from '../models/dataStore'
 import DrawWall from './drawWall'
+import Destroy from './destroy'
 import Pan from './pan'
 import Vue from 'vue'
 
@@ -10,7 +11,8 @@ new Vue({
   data: {
     registry: {
       drawWall: DrawWall,
-      pan: Pan
+      pan: Pan,
+      destroy: Destroy
     },
     activeCmd: null
   },
