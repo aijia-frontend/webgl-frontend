@@ -4,6 +4,7 @@ import DataStore from '../models/dataStore'
 import DrawWall from './drawWall'
 import Destroy from './destroy'
 import Pan from './pan'
+import MoveWallSeg from './moveWallSeg'
 import Vue from 'vue'
 
 // eslint-disable-next-line no-new
@@ -12,7 +13,8 @@ new Vue({
     registry: {
       drawWall: DrawWall,
       pan: Pan,
-      destroy: Destroy
+      destroy: Destroy,
+      moveWallSeg: MoveWallSeg
     },
     activeCmd: null
   },

@@ -121,6 +121,7 @@ const wallJig = Jig.extend({
       this.data.points = this.points
       this.data.startPos = this.startPos
       this.data.endPos = pos
+      this.data.weight = wallWeight
       this.end()
     }
   },

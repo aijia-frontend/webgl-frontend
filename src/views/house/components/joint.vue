@@ -1,5 +1,5 @@
 <template>
-  <g class="joint" :class="{ active: isActive }">
+  <g class="joint" :class="{ active: isActive }" :hidden="hidden">
     <circle :cx="position.x" :cy="position.y" :r="radius" @click="onClick"></circle>
   </g>
 </template>
@@ -17,31 +17,33 @@ export default {
         y: 0
       },
       radius: 0,
-      isActive: false
+      isActive: false,
+      hidden: false
     }
   },
   props: {
-    joint: {
+    model: {
       type: Object,
       required: true
     }
   },
   watch: {
-    joint: {
+    model: {
       handler (newV, old) {
         const options = {
           tag: 'point',
           origin: DataStore.origin
         }
-        this.position = CST.toPhysical(this.joint.position(), options)
-        this.isActive = this.joint.attrs.isActive
+        this.position = CST.toPhysical(this.model.position(), options)
+        this.radius = CST.mm.toPhysical(this.model.radius())
+        this.isActive = this.model.attrs.isActive
       },
       deep: true,
       immediate: true
     }
   },
   created () {
-    this.radius = CST.mm.toPhysical(40)
+    // this.radius = CST.mm.toPhysical(40)
   },
   mounted () {
     // this.wall.$view = this
@@ -49,7 +51,7 @@ export default {
   methods: {
     onClick () {
       console.log('click wall:===>cmd:scoot wall')
-      DataStore.addSelected(this.joint)
+      DataStore.addSelected(this.model)
     }
   }
 }

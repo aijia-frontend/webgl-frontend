@@ -1,10 +1,10 @@
 <template>
-  <g class="wall" :class="{ active: isActive }">
+  <g class="wall" :class="{ active: isActive }" :id="model.uid" :hidden="hidden">
     <polygon
       :points="pointsStr"
       @click="onClick"></polygon>
-    <use :x="start.x" :y="start.y" xlink:href="#wall-end"></use>
-    <use :x="end.x" :y="end.y" xlink:href="#wall-end"></use>
+    <use :x="start.x" :y="start.y" xlink:href="#wall-end" @click="onMoveSeg(end, start)"></use>
+    <use :x="end.x" :y="end.y" xlink:href="#wall-end" @click="onMoveSeg(start, end)"></use>
   </g>
 </template>
 
@@ -25,26 +25,27 @@ export default {
       end: {
         x: 0,
         y: 0
-      }
+      },
+      hidden: false
     }
   },
   props: {
-    wall: {
+    model: {
       type: Object,
       required: true
     }
   },
   watch: {
-    wall: {
+    model: {
       handler (newV, old) {
         const options = {
           tag: 'point',
           origin: DataStore.origin
         }
-        this.pointsStr = this.wall.pointsStr()
-        this.isActive = this.wall.attrs.isActive
-        this.start = CST.toPhysical(this.wall.start(), options)
-        this.end = CST.toPhysical(this.wall.end(), options)
+        this.pointsStr = this.model.pointsStr()
+        this.isActive = this.model.attrs.isActive
+        this.start = CST.toPhysical(this.model.start(), options)
+        this.end = CST.toPhysical(this.model.end(), options)
       },
       deep: true,
       immediate: true
@@ -57,7 +58,20 @@ export default {
     onClick () {
       if (DataStore.activeCmd) return
       console.log('click wall:===>cmd:scoot wall')
-      DataStore.addSelected(this.wall)
+      DataStore.addSelected(this.model)
+    },
+
+    onMoveSeg (start, end) {
+      if (!DataStore.activeCmd) {
+        event.stopPropagation()
+        this.$bus.$emit('moveWallSeg', {
+          drawing: DataStore.drawing,
+          canvas: DataStore.drawing.$el,
+          start,
+          end,
+          wall: this.model
+        })
+      }
     }
   }
 }

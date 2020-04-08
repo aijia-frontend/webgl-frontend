@@ -1,10 +1,44 @@
 import { Point } from '@/common/geometry'
 import CST from '@/common/cst/main'
 import SvgRenderer from '@/common/renderTools'
+import DataStore from '../models/dataStore'
+import _clone from 'lodash/clone'
+
+const POLYGON = {
+  tag: 'polygon',
+  attrs: {
+    class: 'wall preview',
+    points: ''
+  }
+}
+
+const CIRCLE = {
+  tag: 'circle',
+  attrs: {
+    class: 'joint preview'
+  }
+}
+
+const getPointsStr = pts => {
+  return pts.map(pt => pt.x + ' ' + pt.y).join(' ')
+}
 
 const PreViewBuilder = {
+  ptTfOptions: {
+    tag: 'point',
+    origin: DataStore.origin
+  },
   wall (attrs, options) {
-    // return ;
+    const polygon = _clone(POLYGON)
+    if (options.isModel) {
+      attrs = {
+        points: attrs.pointsStr()
+      }
+    } else {
+      attrs.points = getPointsStr(attrs.points)
+    }
+    polygon.attrs.points = attrs.points
+    return SvgRenderer.render(polygon)
   },
 
   dimension (p1, p2) {
@@ -20,6 +54,26 @@ const PreViewBuilder = {
       nodes: distance.toFixed(2) + 'mm'
     }
     return SvgRenderer.render(text)
+  },
+
+  joint (attrs, options) {
+    if (options.isModel) {
+      attrs = {
+        position: CST.toPhysical(attrs.position(), { tag: 'point',
+          origin: DataStore.origin
+        }),
+        radius: CST.mm.toPhysical(attrs.radius())
+      }
+    }
+    const circle = _clone(CIRCLE)
+    circle.attrs.cx = attrs.position.x
+    circle.attrs.cy = attrs.position.y
+    circle.attrs.r = attrs.radius
+    return SvgRenderer.render(circle)
+  },
+
+  build (ent) {
+    return this[ent.type](ent, { isModel: true })
   }
 }
 

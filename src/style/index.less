@@ -32,6 +32,9 @@ svg .wall.active polygon {
 svg .wall.active use {
   display: inline;
 }
+svg[cursor="arrow"] .wall.active use {
+  cursor: move;
+}
 
 svg[cursor="arrow"] .joint circle:hover {
   cursor: move;
@@ -39,6 +42,11 @@ svg[cursor="arrow"] .joint circle:hover {
 }
 svg .joint.active circle {
   fill: #257ab9
+}
+
+/* ========   Transient   ========= */
+svg .transient * {
+  pointer-events: none;
 }
 
 svg .transient .wall {
@@ -55,6 +63,8 @@ svg .transient polyline.wallLine {
   vector-effect: non-scaling-stroke;
 }
 
-svg .transient * {
-  pointer-events: none;
+svg .transient circle.joint {
+  fill: #96969B;
+  stroke-width: 2px;
+  stroke: #ffffff;
 }

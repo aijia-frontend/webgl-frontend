@@ -378,6 +378,20 @@ export default {
       this.$refs.transient.addEntity(node)
     },
 
+    hide (uids) {
+      uids.forEach(uid => {
+        const view = this.$refs.container.$children.find(item => item.model.uid === uid)
+        view.hidden = true
+      })
+    },
+
+    show (uids) {
+      uids.forEach(uid => {
+        const view = this.$refs.container.$children.find(item => item.model.uid === uid)
+        view.hidden = false
+      })
+    },
+
     cmdStart (cmd) {
       const cursor = (cmd.name() === 'pan' ? 'pan' : 'cross')
       this.setCursor(cursor)

@@ -19,7 +19,7 @@ const DrawWall = JigCmd.extend({
     data.points = data.points.map(pt => CST.toLogical(pt, { tag: 'point', origin: DataStore.origin }))
 
     const handler = new NewWallHandler(this.attrs)
-    handler.run(_pick(data, ['points']))
+    handler.run(_pick(data, ['points', 'weight']))
     /* this.attrs.drawing.addContainer({
       type: 'wall',
       data: _pick(data, ['points'])

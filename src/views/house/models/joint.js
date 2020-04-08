@@ -11,6 +11,10 @@ const Joint = Model.extend({
     return _cloneDeep(this.attrs.position)
   },
 
+  radius () {
+    return 40
+  },
+
   walls () {
     return this.attrs.walls.map(this.getRefEnt)
   },

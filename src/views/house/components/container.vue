@@ -1,8 +1,8 @@
 <template>
   <g class="container">
     <!-- <walls></walls> -->
-    <wall v-for="wall in walls" :key="wall.uid" :wall="wall"></wall>
-    <joint v-for="joint in joints" :key="joint.uid" :joint="joint"></joint>
+    <wall v-for="wall in walls" :key="wall.uid" :model="wall"></wall>
+    <joint v-for="joint in joints" :key="joint.uid" :model="joint"></joint>
   </g>
 </template>
 

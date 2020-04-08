@@ -35,17 +35,9 @@ _extend(Model.prototype, vue, {
   },
 
   onChange () {
-    if (this.$view) {
-      this.$view.wall = this
-      this.$view.$nextTick()
-    }
   },
 
   render () {
-    // this.$el = SvgRenderer.render(this.toJSON())
-    // if (this.parent && this.parent.$el) {
-    // this.parent.$el.appendChild(this.$el)
-    // }
   },
 
   toJSON () {
@@ -60,30 +52,6 @@ _extend(Model.prototype, vue, {
     }, { origin: this.origin })
   }
 })
-/* class Model {
-  constructor (attrs, options) {
-    this.attrs = attrs
-    this.options = options
-    this.cid = UUID.generate()
-  }
-
-  render () {
-    this.$el = SvgRenderer.render(this.toJSON())
-    this.attrs.el.appendChild(this.$el)
-  }
-
-  toJSON () {
-    return {
-      tag: 'line',
-      attrs: {
-        x1: 0,
-        y1: 0,
-        x2: 10000,
-        y2: 10000
-      }
-    }
-  }
-} */
 
 Model.extend = extend
 
