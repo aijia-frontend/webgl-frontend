@@ -189,6 +189,7 @@ const wallSegJig = Jig.extend({
       const inters = merge2Walls(points1, this.points)
       points1[2] = inters.inter1.point
       points1[4] = inters.inter2.point
+      this.refWalls[0].points = points1
       SvgRenderer.attr(this.walls[0], { points: getPointsStr(points1) })
       this.points[1] = inters.inter1.point
       this.points[5] = inters.inter2.point
@@ -206,7 +207,11 @@ const wallSegJig = Jig.extend({
       SvgRenderer.attr(this.preview.line, { points: getPointsStr([pos]) })
     } else {
       this.update(pos)
-      this.data.pos = pos
+      this.data.refs = this.refWalls
+      this.data.wall = {
+        ent: this.wall,
+        points: this.points
+      }
       this.end()
     }
   },
