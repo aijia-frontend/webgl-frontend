@@ -1,11 +1,11 @@
 import JigCmd from '@/common/jigCmd'
-import wallSegJig from './wallSegJig'
+import moveWallJig from './moveWallJig'
 import CST from '@/common/cst/main'
 import DataStore from '../models/dataStore'
 import UpdateHandler from '../handler/updateHandler'
 
-const MoveWallSeg = JigCmd.extend({
-  jigType: wallSegJig,
+const MoveWall = JigCmd.extend({
+  jigType: moveWallJig,
 
   initialize (attrs, options) {
     this.attrs = attrs
@@ -21,6 +21,8 @@ const MoveWallSeg = JigCmd.extend({
     data.forEach(item => {
       if (item.points) {
         item.points = item.points.map(toLogical)
+      } else if (item.position) {
+        item.position = toLogical(item.position)
       }
     })
 
@@ -31,4 +33,4 @@ const MoveWallSeg = JigCmd.extend({
   }
 })
 
-export default MoveWallSeg
+export default MoveWall

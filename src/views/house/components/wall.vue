@@ -2,9 +2,9 @@
   <g class="wall" :class="{ active: isActive }" :id="model.uid" :hidden="hidden">
     <polygon
       :points="pointsStr"
-      @click="onClick"></polygon>
-    <use :x="start.x" :y="start.y" xlink:href="#wall-end" @click="onMoveSeg(end, start)"></use>
-    <use :x="end.x" :y="end.y" xlink:href="#wall-end" @click="onMoveSeg(start, end)"></use>
+      @mousedown.left="onMove"></polygon>
+    <use :x="start.x" :y="start.y" xlink:href="#wall-end" @mousedown="onMoveSeg(end, start)"></use>
+    <use :x="end.x" :y="end.y" xlink:href="#wall-end" @mousedown="onMoveSeg(start, end)"></use>
   </g>
 </template>
 
@@ -57,7 +57,6 @@ export default {
   methods: {
     onClick () {
       if (DataStore.activeCmd) return
-      console.log('click wall:===>cmd:scoot wall')
       DataStore.addSelected(this.model)
     },
 
@@ -70,6 +69,23 @@ export default {
           start,
           end,
           wall: this.model
+        })
+      }
+    },
+
+    onMove () {
+      if (!DataStore.activeCmd) {
+        event.stopPropagation()
+        this.onClick()
+        console.log('mouseDown wall:===>cmd:move wall')
+        this.$bus.$emit('moveWall', {
+          drawing: DataStore.drawing,
+          canvas: DataStore.drawing.$el,
+          wall: this.model,
+          startPos: DataStore.drawing.posInContent({
+            x: event.pageX,
+            y: event.pageY
+          })
         })
       }
     }

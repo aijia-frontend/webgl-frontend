@@ -15,6 +15,7 @@
       <patternGroup id="grid-sym-plus" :pattern="patternPlus" :scale="scale"></patternGroup>
       <wallFill></wallFill>
       <grips></grips>
+      <floorFill></floorFill>
     </defs>
     <g class="background">
       <rect class="bg-color" width="100%" hight="100%"/>
@@ -63,6 +64,7 @@
 
 <script>
 import patternGroup from './patternGroup'
+import floorFill from './floorFill'
 import wallFill from './wallFill'
 import grips from './grips'
 import container from './container'
@@ -75,12 +77,12 @@ import DataStore from '../models/dataStore'
 import KeyCode from '@/common/util/keyCode'
 
 const page = {
-  width: 160000, // 160000(mm) 160m
-  height: 100000
+  width: 200000, // 200000(mm) 200m
+  height: 160000
 }
 const boundary = {
-  width: 8000,
-  height: 8000
+  width: 18000,
+  height: 16000
 }
 const space = 100 // space = 500mm
 const defaultGidSpace = 20 // mm
@@ -131,6 +133,7 @@ export default {
   components: {
     patternGroup,
     wallFill,
+    floorFill,
     grips,
     container,
     transient
@@ -296,7 +299,7 @@ export default {
       tf.translate(-pos.x, -pos.y)
         .scale(factor, factor)
         .translate(pos.x, pos.y)
-      if (tf.a <= 0.01) {
+      if (tf.a <= 0.003) {
         console.log('can not zoom out. scale:', this.tf.a)
         return
       }
@@ -378,16 +381,16 @@ export default {
       this.$refs.transient.addEntity(node)
     },
 
-    hide (uids) {
-      uids.forEach(uid => {
-        const view = this.$refs.container.$children.find(item => item.model.uid === uid)
+    hide (ents) {
+      ents.forEach(ent => {
+        const view = this.$refs.container.$children.find(item => item.model.uid === ent.uid)
         view.hidden = true
       })
     },
 
-    show (uids) {
-      uids.forEach(uid => {
-        const view = this.$refs.container.$children.find(item => item.model.uid === uid)
+    show (ents) {
+      ents.forEach(ent => {
+        const view = this.$refs.container.$children.find(item => item.model.uid === ent.uid)
         view.hidden = false
       })
     },

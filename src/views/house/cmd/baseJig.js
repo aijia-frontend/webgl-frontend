@@ -1,4 +1,5 @@
 import BaseJig from '@/common/baseJig'
+import CST from '@/common/cst/main'
 import DataStore from '../models/dataStore'
 
 const cancelBubble = function (e) {
@@ -21,6 +22,13 @@ const Jig = BaseJig.extend({
     'mousedown': 'onMouseDown',
     'mousemove': 'onMouseMove',
     'mouseup': 'onMouseUp'
+  },
+
+  point2Physical (pt) {
+    return CST.toPhysical(pt, {
+      tag: 'point',
+      origin: DataStore.origin
+    })
   },
 
   initialize (attrs, options) {

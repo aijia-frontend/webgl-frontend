@@ -5,6 +5,7 @@ import DrawWall from './drawWall'
 import Destroy from './destroy'
 import Pan from './pan'
 import MoveWallSeg from './moveWallSeg'
+import MoveWall from './moveWall'
 import Vue from 'vue'
 
 // eslint-disable-next-line no-new
@@ -14,7 +15,8 @@ new Vue({
       drawWall: DrawWall,
       pan: Pan,
       destroy: Destroy,
-      moveWallSeg: MoveWallSeg
+      moveWallSeg: MoveWallSeg,
+      moveWall: MoveWall
     },
     activeCmd: null
   },

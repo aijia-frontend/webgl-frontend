@@ -491,6 +491,11 @@ _.extend(PolyLine, {
     }
 
     return ans
+  },
+
+  length (pl1, options) {
+    pl1 = new PolyLine(pl1)
+    return pl1.length(options)
   }
 })
 
@@ -571,6 +576,15 @@ _.extend(PolyLine.prototype, {
     }
 
     return ans
+  },
+
+  length (options) {
+    const lines = this.lines(options)
+    let len = 0
+    lines.forEach(item => {
+      len += item.length()
+    })
+    return len
   }
 })
 

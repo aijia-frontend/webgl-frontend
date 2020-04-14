@@ -5,24 +5,25 @@ const UpdateHandler = BaseHandler.extend({
     BaseHandler.prototype.initialize.apply(this, arguments)
   },
 
-  updateRefs (refs) {
-    this.dataStore.update(refs)
+  updateData (data) {
+    this.dataStore.update(data)
   },
 
   updateTarget (target) {
-    if (target.ent.type === 'wall') this.updateWall(target)
-    this.updateRefs(target)
+    if (target.ent.type === 'wall') this.updateRefs(target)
+    this.updateData(target)
   },
 
-  updateWall (wall) {
+  updateRefs (wall) {
     // attach Wall
     // join Wall
     // cross Wall
   },
 
   run (data) {
-    this.updateRefs(data.refs)
-    this.updateTarget(data.wall)
+    data.forEach(item => {
+      this.updateTarget(item)
+    })
   }
 })
 

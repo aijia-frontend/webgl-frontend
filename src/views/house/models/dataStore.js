@@ -17,7 +17,8 @@ const DataStore = new Vue({
     selectedEnts: [],
     ents: [],
     walls: [],
-    joints: []
+    joints: [],
+    areas: []
   },
 
   watch: {
