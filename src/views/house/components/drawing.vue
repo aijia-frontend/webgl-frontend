@@ -8,15 +8,7 @@
     @mousewheel="onMouseWheel"
     @mousedown.right="onRightClick"
     @click.right.stop.prevent="onClick">
-    <defs>
-      <patternGroup id="grid-sym-minus-min" :pattern="patternMinusMin" :scale="scale"></patternGroup>
-      <patternGroup id="grid-sym-minus" :pattern="patternMinus" :scale="scale"></patternGroup>
-      <patternGroup id="grid-sym" :pattern="pattern" :scale="scale"></patternGroup>
-      <patternGroup id="grid-sym-plus" :pattern="patternPlus" :scale="scale"></patternGroup>
-      <wallFill></wallFill>
-      <grips></grips>
-      <floorFill></floorFill>
-    </defs>
+    <def :scale="scale" :origin="origin"></def>
     <g class="background">
       <rect class="bg-color" width="100%" hight="100%"/>
       <rect
@@ -63,10 +55,7 @@
 </template>
 
 <script>
-import patternGroup from './patternGroup'
-import floorFill from './floorFill'
-import wallFill from './wallFill'
-import grips from './grips'
+import def from './defs'
 import container from './container'
 import transient from './transient'
 
@@ -81,11 +70,12 @@ const page = {
   height: 160000
 }
 const boundary = {
-  width: 18000,
-  height: 16000
+  width: 12000,
+  height: 8000
 }
-const space = 100 // space = 500mm
 const defaultGidSpace = 20 // mm
+const minScale = 0.003
+const maxScale = 0.3
 
 export default {
   name: 'Drawing',
@@ -93,30 +83,6 @@ export default {
   data () {
     return {
       cursor: 'arrow',
-      pattern: {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0
-      },
-      patternPlus: {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0
-      },
-      patternMinus: {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0
-      },
-      patternMinusMin: {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0
-      },
       origin: {},
       tf: Matrix.identity(),
       boundary: {
@@ -131,10 +97,7 @@ export default {
   },
 
   components: {
-    patternGroup,
-    wallFill,
-    floorFill,
-    grips,
+    def,
     container,
     transient
   },
@@ -160,12 +123,9 @@ export default {
     }
   },
 
-  created () {
-  },
-
   mounted () {
     this.el = document.getElementById('svg')
-    this.calcPattern()
+    this.initPage()
     this.defaultGidSpace = defaultGidSpace
     this.zoomExtend()
     DataStore.drawing = this
@@ -179,7 +139,7 @@ export default {
   },
 
   methods: {
-    calcPattern () {
+    initPage () {
       const $el = document.getElementById('canvas')
       const width = $el.offsetWidth
       const height = $el.offsetHeight
@@ -188,24 +148,6 @@ export default {
         y: height * 0.5
       }
       DataStore.origin = this.origin
-
-      const pxPerMM = CST.mm.toPhysical(1.0) // 1
-      this.pattern.x = this.origin.x
-      this.pattern.y = this.origin.y
-      this.pattern.width = space * pxPerMM // 500mm
-      this.pattern.height = space * pxPerMM
-
-      this.patternPlus = Object.assign({}, this.pattern) // 5
-      this.patternPlus.width *= 5 // 1250
-      this.patternPlus.height *= 5
-
-      this.patternMinus = Object.assign({}, this.pattern) // 0.2
-      this.patternMinus.width *= 0.2 // 100
-      this.patternMinus.height *= 0.2
-
-      this.patternMinusMin = Object.assign({}, this.patternMinus) // 0.04
-      this.patternMinusMin.width *= 0.2 // 20
-      this.patternMinusMin.height *= 0.2
 
       const rect = {
         x: -page.width * 0.5,
@@ -299,11 +241,11 @@ export default {
       tf.translate(-pos.x, -pos.y)
         .scale(factor, factor)
         .translate(pos.x, pos.y)
-      if (tf.a <= 0.003) {
+      if (tf.a <= minScale) {
         console.log('can not zoom out. scale:', this.tf.a)
         return
       }
-      if (tf.a >= 20) {
+      if (tf.a >= maxScale) {
         console.log('can not zoom in. scale:', this.tf.a)
         return
       }

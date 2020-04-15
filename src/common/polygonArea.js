@@ -34,7 +34,7 @@ const polygonArea = (pts) => {
 const calAreaBy3Pts = (p1, p0, p2) => {
   const v1 = new Vector(p0, p1)
   const v2 = new Vector(p0, p2)
-  return Math.abs(v1.x * v2.y - v1.y * v2.x) / 2
+  return Math.abs(v1.crossProduct(v2).magnitude()) / 2
 }
 
 const getPointIndex = (pts, index) => {

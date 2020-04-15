@@ -4,7 +4,8 @@ import Vector from '@/common/vector'
 import { Point } from '@/common/geometry'
 import Matrix from '@/common/matrix'
 import CST from '@/common/cst/main'
-// import _cloneDeep from 'lodash/cloneDeep'
+import Snap from '../snap/main'
+import _cloneDeep from 'lodash/cloneDeep'
 // import PreViewBuilder from './previewBuilder'
 const wallWeight = 140 // mm
 
@@ -128,9 +129,22 @@ const wallJig = Jig.extend({
 
   onMouseMove (e) {
     Jig.prototype.onMouseMove.apply(this, arguments)
-    if (!this.startPos) return
     const pos = this.getPos(e)
+    if (!this.startPos) return
     this.update(pos)
+  },
+
+  getPos (e) {
+    let pos = this.drawing.posInContent({
+      x: e.pageX,
+      y: e.pageY
+    })
+    Snap.reset({ func: 'hide' })
+    const snap = Snap.find(_cloneDeep(pos))
+    if (snap) {
+      pos = snap
+    }
+    return pos
   }
 })
 

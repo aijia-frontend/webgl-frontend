@@ -1,6 +1,7 @@
 import BaseJig from '@/common/baseJig'
 import CST from '@/common/cst/main'
 import DataStore from '../models/dataStore'
+import Snap from '../snap/main'
 
 const cancelBubble = function (e) {
   window.event ? window.event.cancelBubble = true : e.stopPropagation()
@@ -45,6 +46,11 @@ const Jig = BaseJig.extend({
   },
 
   prepare () {},
+
+  cleanup () {
+    Snap.reset({ func: 'reset' })
+    BaseJig.prototype.cleanup.apply(this, arguments)
+  },
 
   onKeyUp (e) {
     const code = e.charCode ? e.charCode : e.keyCode

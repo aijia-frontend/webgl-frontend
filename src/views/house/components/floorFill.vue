@@ -33,8 +33,8 @@ export default {
   },
   mounted () {
     const pxPerMM = CST.mm.toPhysical(1)
-    this.width = size.width * pxPerMM
-    this.height = size.height * pxPerMM
+    this.width = size.width * pxPerMM * 2
+    this.height = size.height * pxPerMM * 2
   }
 }
 </script>

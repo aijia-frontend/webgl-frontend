@@ -30,7 +30,7 @@ const Area = Model.extend({
       const length2 = (new PolyLine(loops.loop2)).length({ isClosed: true })
       return length1 < length2 ? loops.loop1 : loops.loop2
     } else {
-      return loops.loop1.length < loops.loop2.length ? loops.loop1 : loops.loop2
+      return loops.loop1.length === this.attrs.joints.length ? loops.loop1 : loops.loop2
     }
   },
 
