@@ -4,7 +4,7 @@
       :points="pointsStr"></polygon>
     <text :x="textPos.x" :y="textPos.y">
       <tspan>{{ name }}</tspan>
-      <tspan dx="-100%" dy="100%">{{ area }}</tspan>
+      <tspan dx="-150%" dy="100%">{{ area }}</tspan>
     </text>
   </g>
 </template>
@@ -60,12 +60,12 @@ export default {
 </script>
 
 <style scoped>
-polygon {
+.area polygon {
   fill: url(#floor) !important;
   stroke-width: 0 !important;
 }
-text {
-  text-anchor: "middle";
+.area text {
+  text-anchor: middle;
   fill: #202020;
   font-size: 600px;
   font-family: serif;

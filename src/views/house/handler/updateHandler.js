@@ -15,6 +15,15 @@ const UpdateHandler = BaseHandler.extend({
   },
 
   updateRefs (wall) {
+    const areas = this.dataStore.areas.filter(area => area.attrs.walls.includes(wall.ent.uid))
+    const update = areas.map(area => {
+      return {
+        ent: area,
+        isChange: true
+      }
+    })
+    this.dataStore.update(update)
+
     // attach Wall
     // join Wall
     // cross Wall

@@ -20,7 +20,8 @@ _extend(LineSnap.prototype, {
         x2: this.attrs.end.x,
         y2: this.attrs.end.y,
         stroke: '#FF521D',
-        'stroke-width': '2mm'
+        'stroke-width': '1px',
+        'vector-effect': 'non-scaling-stroke'
       }
     }
 

@@ -140,10 +140,11 @@ const wallJig = Jig.extend({
       y: e.pageY
     })
     Snap.reset({ func: 'hide' })
-    const snap = Snap.find(_cloneDeep(pos))
-    if (snap) {
-      pos = snap
+    const oSnap = Snap.find(_cloneDeep(pos), { start: _cloneDeep(this.startPos) })
+    if (oSnap) {
+      pos = oSnap.position
     }
+    this.data.wall = oSnap && oSnap.wall
     return pos
   }
 })

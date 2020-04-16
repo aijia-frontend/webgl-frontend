@@ -1,6 +1,6 @@
 <template>
   <g class="joint" :class="{ active: isActive }" :hidden="hidden">
-    <circle :cx="position.x" :cy="position.y" :r="radius" @click="onClick"></circle>
+    <circle :cx="position.x" :cy="position.y" :r="radius" @mousedown.left="onMove"></circle>
   </g>
 </template>
 
@@ -49,9 +49,21 @@ export default {
     // this.wall.$view = this
   },
   methods: {
-    onClick () {
-      console.log('click wall:===>cmd:scoot wall')
-      DataStore.addSelected(this.model)
+    onMove () {
+      if (!DataStore.activeCmd) {
+        event.stopPropagation()
+        this.onClick()
+        console.log('mouseDown joint:===>cmd:move joint')
+        this.$bus.$emit('moveJoint', {
+          drawing: DataStore.drawing,
+          canvas: DataStore.drawing.$el,
+          activeEnt: this.model,
+          startPos: DataStore.drawing.posInContent({
+            x: event.pageX,
+            y: event.pageY
+          })
+        })
+      }
     }
   }
 }

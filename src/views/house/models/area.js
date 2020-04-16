@@ -60,6 +60,13 @@ const Area = Model.extend({
     return this.attrs.name || '未命名'
   },
 
+  update (data, options = { silent: false }) {
+    this.attrs = Object.assign({}, this.attrs, data)
+    this._points = null
+    this._area = null
+    if (!options.silent) this.onChange()
+  },
+
   centerPos () {
     const points = this.points()
     const xMin = minBy(points, pt => pt.x).x

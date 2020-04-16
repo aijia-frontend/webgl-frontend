@@ -76,12 +76,12 @@ export default {
     onMove () {
       if (!DataStore.activeCmd) {
         event.stopPropagation()
-        this.onClick()
+        DataStore.addSelected(this.model)
         console.log('mouseDown wall:===>cmd:move wall')
         this.$bus.$emit('moveWall', {
           drawing: DataStore.drawing,
           canvas: DataStore.drawing.$el,
-          wall: this.model,
+          activeEnt: this.model,
           startPos: DataStore.drawing.posInContent({
             x: event.pageX,
             y: event.pageY

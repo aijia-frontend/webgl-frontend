@@ -295,10 +295,7 @@ export default {
     },
 
     zoomExtend () {
-      const pxPerMM = CST.mm.toPhysical(1.0)
-      const width = boundary.width * pxPerMM
-      const height = boundary.height * pxPerMM
-      const scale = Math.min(this.origin.x * 2 / width, this.origin.y * 2 / height) * 0.8
+      const scale = Math.min(boundary.width / page.width, boundary.height / page.height) * 0.8
       // console.log('scale:', scale)
       const tf = Matrix.identity()
       tf.translate(-this.origin.x, -this.origin.y)

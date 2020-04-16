@@ -16,6 +16,7 @@ const DrawWall = JigCmd.extend({
   },
 
   onEnd (data) {
+    if (data.wall) data.endPos = null
     data.points = data.points.map(pt => CST.toLogical(pt, { tag: 'point', origin: DataStore.origin }))
 
     const handler = new NewWallHandler(this.attrs)

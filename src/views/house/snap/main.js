@@ -112,6 +112,7 @@ const findHVLine = (pos, options) => {
   pos = toLogical(pos)
   const walls = DataStore.walls
   const pts = []
+  if (options.start) pts.push(toLogical(options.start))
   walls.forEach(wall => pts.push(wall.start(), wall.end()))
   let hPos = pts.find(pt => {
     return findHV(pt, pos, 'y') // h
@@ -165,22 +166,33 @@ const reset = (options) => {
 
 const find = (pos, options) => {
   let position = pos
+  let wall = null
   const snap = findEnd(pos, options) ||
     findCenter(pos, options) ||
     findInsideWall(pos, options)
 
   if (snap) {
     position = snap
+    wall = true
   }
-  const hv = findHVLine(pos)
+  const hv = findHVLine(pos, options)
   if (hv.hPos) {
     position.y = hv.hPos.y
+    jointSnap.update(position)
+    centerSnap.update(position)
+    wallInsideSnap.update(position)
   }
   if (hv.vPos) {
     position.x = hv.vPos.x
+    jointSnap.update(position)
+    centerSnap.update(position)
+    wallInsideSnap.update(position)
   }
 
-  return position
+  return {
+    position,
+    wall
+  }
 }
 
 export default {
