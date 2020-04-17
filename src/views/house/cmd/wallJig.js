@@ -134,6 +134,30 @@ const wallJig = Jig.extend({
     this.update(pos)
   },
 
+  onMouseUp (e) {
+    if (e.button !== 2) return
+    if (!this.isMove) {
+      if (this.startPos) {
+        this.startPos = null
+
+        // 重置临时视图
+        this.points = []
+        SvgRenderer.attr(this.preview.wall, { points: '' })
+        SvgRenderer.attr(this.preview.line, { points: '' })
+        this.$bus.$emit('dimension', {
+          pos: { x: 0, y: 0 },
+          length: 0,
+          wallWeight
+        })
+        Jig.prototype.onMouseUp.apply(this, arguments)
+      } else {
+        this.cancel()
+      }
+    } else {
+      Jig.prototype.onMouseUp.apply(this, arguments)
+    }
+  },
+
   getPos (e) {
     let pos = this.drawing.posInContent({
       x: e.pageX,

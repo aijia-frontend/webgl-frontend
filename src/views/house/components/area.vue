@@ -4,7 +4,7 @@
       :points="pointsStr"></polygon>
     <text :x="textPos.x" :y="textPos.y">
       <tspan>{{ name }}</tspan>
-      <tspan dx="-150%" dy="100%">{{ area }}</tspan>
+      <tspan dx="-100%" dy="100%">{{ area }}</tspan>
     </text>
   </g>
 </template>

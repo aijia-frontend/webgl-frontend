@@ -24,6 +24,10 @@ const Wall = Model.extend({
     return _cloneDeep(this.attrs.points)
   },
 
+  weight () {
+    return this.attrs.weight
+  },
+
   originPoints () {
     return [this.attrs.points[0], this.attrs.points[3]]
   },

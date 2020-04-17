@@ -81,6 +81,7 @@ const Jig = BaseJig.extend({
 
   onMouseMove (e) {
     if (this.pan && this.panStart) {
+      this.isMove = true
       const pos = this.getPosInView(e)
       const offset = {
         x: pos.x - this.panStart.x,
@@ -94,6 +95,7 @@ const Jig = BaseJig.extend({
 
   onMouseUp (e) {
     if (!this.pan) return
+    this.isMove = false
     this.pan = false
     this.panStart = null
     this.drawing.setCursor('cross')

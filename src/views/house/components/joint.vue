@@ -52,7 +52,7 @@ export default {
     onMove () {
       if (!DataStore.activeCmd) {
         event.stopPropagation()
-        this.onClick()
+        DataStore.addSelected(this.model)
         console.log('mouseDown joint:===>cmd:move joint')
         this.$bus.$emit('moveJoint', {
           drawing: DataStore.drawing,
