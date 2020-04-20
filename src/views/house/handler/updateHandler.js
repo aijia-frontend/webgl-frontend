@@ -6,7 +6,9 @@ const UpdateHandler = BaseHandler.extend({
   },
 
   updateData (data) {
-    this.dataStore.update(data)
+    const ent = data.ent
+    delete data.ent
+    ent.update(data)
   },
 
   updateTarget (target) {
@@ -16,13 +18,7 @@ const UpdateHandler = BaseHandler.extend({
 
   updateRefs (wall) {
     const areas = this.dataStore.areas.filter(area => area.attrs.walls.includes(wall.ent.uid))
-    const update = areas.map(area => {
-      return {
-        ent: area,
-        isChange: true
-      }
-    })
-    this.dataStore.update(update)
+    areas.forEach(area => area.update({}))
 
     // attach Wall
     // join Wall

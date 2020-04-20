@@ -84,19 +84,12 @@ const Area = Model.extend({
     return getPointsStr(points)
   },
 
-  destroy () {
-    Model.prototype.destroy.apply(this, arguments)
-    this.updateJoint()
-  },
-
-  updateJoint () {
-    if (this.attrs.joints && this.attrs.joints.length) {
-      this.joints().forEach(joint => joint.remWall(this.uid))
-    }
-  },
-
   joints () {
     return (this.attrs.joints || []).map(this.getRefEnt)
+  },
+
+  walls () {
+    return (this.attrs.walls || []).map(this.getRefEnt)
   },
 
   addJoint (joint) {

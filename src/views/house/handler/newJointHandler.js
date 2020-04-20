@@ -10,7 +10,7 @@ const NewJointHandler = BaseHandler.extend({
   },
 
   createJoint (data) {
-    data.walls = data.walls.map(item => DataStore.get(item.uid))
+    // data.walls = data.walls.map(item => DataStore.get(item.uid))
     const walls = data.walls.map(item => item.uid)
     const joint = DataStore.create({
       type: 'joint',
@@ -23,16 +23,12 @@ const NewJointHandler = BaseHandler.extend({
     this.updateWalls(data.walls, joint)
     this.getChains(joint)
     this.createArea()
+    return joint
   },
 
   updateWalls (walls, joint) {
     walls.forEach(wall => {
-      const joints = wall.attrs.joints || []
-      joints.push(joint.uid)
-      DataStore.update({
-        ent: wall,
-        joints
-      })
+      wall.addJoint(joint.uid)
     })
   },
 
@@ -137,7 +133,7 @@ const NewJointHandler = BaseHandler.extend({
   },
 
   run (data) {
-    this.createJoint(data)
+    return this.createJoint(data)
   }
 })
 

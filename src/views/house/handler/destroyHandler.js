@@ -6,17 +6,17 @@ import { Point, Line } from '@/common/geometry'
 const DestroyHandler = BaseHandler.extend({
   initialize () {
     this.destroyEnts = []
-    this.updateEnts = []
     this.refJoints = []
+    this.refAreas = []
     BaseHandler.prototype.initialize.apply(this, arguments)
   },
 
-  refJointsPush (uid) {
+  addToColl (coll, uid) {
     if (Array.isArray(uid)) {
-      uid.forEach(item => this.refJointsPush(item))
+      uid.forEach(item => this.addToColl(coll, item))
     } else {
-      const index = this.refJoints.indexOf(uid)
-      if (index < 0) this.refJoints.push(uid)
+      const index = coll.indexOf(uid)
+      if (index < 0) coll.push(uid)
     }
   },
 
@@ -31,6 +31,10 @@ const DestroyHandler = BaseHandler.extend({
           this.destroyJoint(item)
           break
         }
+        case 'area': {
+          this.destroyArea(item)
+          break
+        }
         default: {
           this.destroyEnt(item)
         }
@@ -38,6 +42,7 @@ const DestroyHandler = BaseHandler.extend({
     })
 
     this.jointHandler()
+    this.areaHandler()
   },
 
   destroyEnt (ent) {
@@ -46,30 +51,59 @@ const DestroyHandler = BaseHandler.extend({
   },
 
   destroyWall (wall) {
-    if (wall.attrs.joints && wall.attrs.joints.length) this.refJointsPush(wall.attrs.joints)
+    if (wall.isDestroy()) return
+    if (wall.attrs.joints && wall.attrs.joints.length) this.addToColl(this.refJoints, wall.attrs.joints)
     this.destroyEnt(wall)
+    const areas = this.dataStore.areas.filter(item => item.type === 'area' && !item.isDestroy() && item.attrs.walls.includes(wall.uid)).map(item => item.uid)
+    this.addToColl(this.refAreas, areas)
+  },
+
+  destroyJoint (joint) {
+    this.destroyEnt(joint)
+
+    const walls = joint.walls()
+    // const joints = []
+    walls.forEach(wall => {
+      // joints.push(...wall.attrs.joints || [])
+      this.destroyWall(wall)
+    }, this)
+    // this.addToColl(this.refJoints, joints.filter(item => item !== joint.uid))
+  },
+
+  destroyArea (area) {
+    this.destroyEnt(area)
+
+    // 删除只存在两堵墙的节点
+    const joints = area.joints()
+    joints.forEach(joint => {
+      if (joint.attrs.walls.length === 2) this.destroyJoint(joint)
+    }, this)
   },
 
   jointHandler () {
     this.refJoints.forEach(item => {
       const joint = this.dataStore.get(item)
-      const walls = joint.walls()
+      if (joint.isDestroy()) return
+      const walls = joint.walls().filter(item => !item.isDestroy())
       if (walls.length < 2) {
         this.destroyEnt(joint)
+      } else {
+        joint.attrs.walls = []
+        walls.forEach(wall => joint.addWall(wall.uid))
       }
-      this.updateWall(walls, joint)
+      if (walls.length) this.updateWall(walls, joint)
     })
   },
 
-  destroyJoint (joint) {
-    const walls = joint.walls()
-    const joints = []
-    walls.forEach(wall => {
-      joints.push(...wall.attrs.joints || [])
-      this.destroyEnt(wall)
-    })
-    this.destroyEnt(joint)
-    this.refJointsPush(joints.filter(item => item !== joint.uid))
+  areaHandler () {
+    if (this.refAreas.length === 1) { // destroy || update
+      const area = this.dataStore.get(this.refAreas[0])
+      // 如果区域不能闭合 则删除
+      // if (area.isClosed) // update else destory
+      this.destroyEnt(area)
+    } else { // merge
+
+    }
   },
 
   updateWall (walls, joint) {
@@ -94,17 +128,15 @@ const DestroyHandler = BaseHandler.extend({
         points[4] = p2
       }
       wall.remJoint(joint.uid)
-      this.updateEnts.push({
-        ent: wall,
-        points
-      })
+      wall.update({ points })
+    } else {
+      // 处理多面墙的情况
     }
   },
 
   run (data) {
     this.destroy(data)
 
-    this.dataStore.update(this.updateEnts)
     this.dataStore.destroy(this.destroyEnts)
   }
 })

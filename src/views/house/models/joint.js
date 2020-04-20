@@ -19,9 +19,18 @@ const Joint = Model.extend({
     return this.attrs.walls.map(this.getRefEnt)
   },
 
+  addWall (wallId) {
+    if (!this.attrs.walls) this.attrs.walls = []
+    this.attrs.walls.push(wallId)
+    this.onChange()
+    return this
+  },
+
   remWall (wallId) {
     const index = this.attrs.walls.indexOf(wallId)
+    if (index < 0) return
     this.attrs.walls.splice(index, 1)
+    this.onChange()
     return this
   },
 

@@ -81,17 +81,9 @@ const NewWallHandler = BaseHandler.extend({
       position: points1[3],
       walls: [wall1, wall2]
     })
-    DataStore.update([{
-      ent: wall1,
-      points: points1
-    }, {
-      ent: wall2,
-      points: points2
-    }])
-    // setTimeout(() => {
+
     wall1.update({ points: points1 })
     wall2.update({ points: points2 })
-    // }, 3000)
   },
 
   createJoint (data) {

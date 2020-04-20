@@ -37,17 +37,6 @@ const Wall = Model.extend({
     return getPointsStr(points)
   },
 
-  destroy () {
-    Model.prototype.destroy.apply(this, arguments)
-    this.updateJoint()
-  },
-
-  updateJoint () {
-    if (this.attrs.joints && this.attrs.joints.length) {
-      this.joints().forEach(joint => joint.remWall(this.uid))
-    }
-  },
-
   joints () {
     return (this.attrs.joints || []).map(this.getRefEnt)
   },
@@ -55,12 +44,14 @@ const Wall = Model.extend({
   addJoint (joint) {
     if (!this.attrs.joints) this.attrs.joints = []
     this.attrs.joints.push(joint)
+    this.onChange()
     return this
   },
 
   remJoint (joint) {
     const index = this.attrs.joints.indexOf(joint)
     this.attrs.joints.splice(index, 1)
+    this.onChange()
     return this
   },
 

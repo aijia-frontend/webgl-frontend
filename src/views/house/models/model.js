@@ -32,9 +32,15 @@ _extend(Model.prototype, vue, {
 
   destroy () {
     this._isDestroyed = true
+    this.onChange()
+  },
+
+  isDestroy () {
+    return this._isDestroyed
   },
 
   onChange () {
+    vue.$bus.$emit('modelChange', this)
   },
 
   render () {

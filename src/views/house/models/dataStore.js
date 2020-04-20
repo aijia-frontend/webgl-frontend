@@ -25,6 +25,7 @@ const DataStore = new Vue({
   },
 
   created () {
+    this.$bus.$on('modelChange', this.onChange)
   },
 
   methods: {
@@ -39,10 +40,7 @@ const DataStore = new Vue({
         /* const index = _findIndex(this.selectedEnts, item => item.uid === ent.uid)
         if (index >= 0) return */
         this.selectedEnts.push(ent)
-        this.update({
-          ent,
-          isActive: true
-        })
+        ent.update({ isActive: true })
       }
     },
 
@@ -59,31 +57,8 @@ const DataStore = new Vue({
         const index = _findIndex(this.selectedEnts, item => item.uid === ent.uid)
         if (index < 0) return
         this.selectedEnts.splice(index, 1)
-        this.update({
-          ent,
-          isActive: false
-        })
-      }
-    },
-
-    update (data) {
-      if (Array.isArray(data)) {
-        data.forEach(item => this.update(item))
-      } else if (_isObject(data)) {
-        const type = data.ent.type + 's'
-        const index = _findIndex(this[type], (ent) => ent.uid === data.ent.uid)
-        if (index < 0) {
-          console.warn('can not find this ent. uid: ', data.uid)
-          return
-        }
-        const ent = _cloneDeep(this[type][index])
-        delete data.ent
-        ent.update(data)
-        this.$set(this[type], index, ent)
-        this[type][index].update(data)
-
-        const index2 = _findIndex(this.ents, item => item.uid === ent.uid)
-        if (index2 > -1) this.ents[index2] = ent
+        const _ent = this.get(ent.uid)
+        _ent.update({ isActive: false })
       }
     },
 
@@ -123,6 +98,22 @@ const DataStore = new Vue({
         this.ents.push(model)
         return model
       }
+    },
+
+    onChange (model) {
+      const type = model.type + 's'
+      const index = _findIndex(this[type], (ent) => ent.uid === model.uid)
+      if (index < 0) {
+        console.warn('can not find this ent. uid: ', model.uid)
+        return
+      }
+      const ent = _cloneDeep(model)
+      ent.isUpdate = true
+      this.$set(this[type], index, ent)
+      this[type][index].isUpdate = false
+
+      const index2 = _findIndex(this.ents, item => item.uid === model.uid)
+      if (index2 > -1) this.ents[index2] = model
     }
   }
 })
