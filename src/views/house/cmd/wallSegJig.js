@@ -1,9 +1,9 @@
 import Jig from './baseJig'
 import SvgRenderer from '@/common/renderTools'
 import Vector from '@/common/vector'
-import { Point, Line } from '@/common/geometry'
-import Matrix from '@/common/matrix'
+import { Point } from '@/common/geometry'
 import CST from '@/common/cst/main'
+import { getPointsStr, pointAdd, pointRotate, changeStart, merge2Walls } from '@/common/util/pointUtil'
 import PreviewBuilder from './previewBuilder'
 import DataStore from '../models/dataStore'
 import _cloneDeep from 'lodash/cloneDeep'
@@ -14,56 +14,6 @@ const line = {
   attrs: {
     class: 'wallLine preview',
     points: ''
-  }
-}
-
-const getPointsStr = pts => {
-  return pts.map(pt => pt.x + ' ' + pt.y).join(' ')
-}
-
-const pointAdd = (pt, offset) => {
-  return {
-    x: pt.x + offset.x,
-    y: pt.y + offset.y
-  }
-}
-
-const changeStart = (points) => {
-  const first3Pts = points.splice(0, 3)
-  points.push(...first3Pts)
-  return points
-}
-
-const pointTransform = (pt, center, angle) => {
-  const tf = Matrix.identity()
-  tf.translate(-center.x, -center.y)
-  tf.rotate(angle)
-  tf.translate(center.x, center.y)
-  return Point.transform(pt, tf)
-}
-
-const merge2Walls = (points1, points2) => {
-  const l1 = new Line(points1[1], points1[2])
-  const l2 = new Line(points1[4], points1[5])
-  const c1 = new Line(points2[1], points2[2])
-  const c2 = new Line(points2[4], points2[5])
-  let inter1 = Line.intersect(l1, c1, { extend: true })
-  let inter2 = Line.intersect(l2, c2, { extend: true })
-  if (!inter1 || !inter2) {
-    inter1 = {
-      point: points2[1],
-      p1: 1,
-      p2: 0
-    }
-    inter2 = {
-      point: points2[5],
-      p1: 0,
-      p2: 1
-    }
-  }
-  return {
-    inter1,
-    inter2
   }
 }
 
@@ -171,9 +121,9 @@ const wallSegJig = Jig.extend({
       x: pos.x - this.startPos.x,
       y: pos.y - this.startPos.y
     }
-    const p1 = pointTransform(point, this.startPos, angle + Math.PI / 2)
+    const p1 = pointRotate(point, this.startPos, angle + Math.PI / 2)
     const p2 = pointAdd(p1, offset)
-    const p3 = pointTransform(point, this.startPos, angle - Math.PI / 2)
+    const p3 = pointRotate(point, this.startPos, angle - Math.PI / 2)
     const p4 = pointAdd(p3, offset)
     const points = [this.startPos, p1, p2, pos, p4, p3]
     this.points = points

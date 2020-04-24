@@ -1,10 +1,7 @@
 import Model from './model'
 import CST from '@/common/cst/main'
+import { getPointsStr } from '@/common/util/pointUtil'
 import _cloneDeep from 'lodash/cloneDeep'
-
-const getPointsStr = pts => {
-  return pts.map(pt => pt.x + ' ' + pt.y).join(' ')
-}
 
 const Wall = Model.extend({
   initialize () {

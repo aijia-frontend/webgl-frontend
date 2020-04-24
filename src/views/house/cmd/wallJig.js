@@ -2,10 +2,10 @@ import Jig from './baseJig'
 import SvgRenderer from '@/common/renderTools'
 import Vector from '@/common/vector'
 import { Point } from '@/common/geometry'
-import Matrix from '@/common/matrix'
 import CST from '@/common/cst/main'
 import Snap from '../snap/main'
 import _cloneDeep from 'lodash/cloneDeep'
+import { getPointsStr, pointAdd, pointRotate } from '@/common/util/pointUtil'
 // import PreViewBuilder from './previewBuilder'
 const wallWeight = 140 // mm
 
@@ -23,33 +23,6 @@ const line = {
     class: 'wallLine preview',
     points: ''
   }
-}
-
-/* const group = {
-  tag: 'g',
-  attrs: {
-    class: 'wall preview'
-  },
-  nodes: [polygon]
-} */
-
-const getPointsStr = pts => {
-  return pts.map(pt => pt.x + ' ' + pt.y).join(' ')
-}
-
-const pointAdd = (pt, offset) => {
-  return {
-    x: pt.x + offset.x,
-    y: pt.y + offset.y
-  }
-}
-
-const pointTransform = (pt, center, angle) => {
-  const tf = Matrix.identity()
-  tf.translate(-center.x, -center.y)
-  tf.rotate(angle)
-  tf.translate(center.x, center.y)
-  return Point.transform(pt, tf)
 }
 
 const wallJig = Jig.extend({
@@ -103,9 +76,9 @@ const wallJig = Jig.extend({
       x: pos.x - this.startPos.x,
       y: pos.y - this.startPos.y
     }
-    const p1 = pointTransform(point, this.startPos, angle + Math.PI / 2)
+    const p1 = pointRotate(point, this.startPos, angle + Math.PI / 2)
     const p2 = pointAdd(p1, offset)
-    const p3 = pointTransform(point, this.startPos, angle - Math.PI / 2)
+    const p3 = pointRotate(point, this.startPos, angle - Math.PI / 2)
     const p4 = pointAdd(p3, offset)
     const points = [this.startPos, p1, p2, pos, p4, p3]
     this.points = points

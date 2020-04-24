@@ -4,7 +4,7 @@
     width="100%"
     height="100%"
     :cursor="cursor"
-    @click="onClick"
+    @mousedown.left="onLeftClick"
     @mousewheel="onMouseWheel"
     @mousedown.right="onRightClick"
     @click.right.stop.prevent="onClick">
@@ -251,6 +251,12 @@ export default {
       }
 
       this.transform(tf)
+    },
+
+    onLeftClick () {
+      // click blank
+      if (DataStore.activeCmd) return
+      DataStore.remSelected(DataStore.selectedEnts)
     },
 
     onRightClick (e) {

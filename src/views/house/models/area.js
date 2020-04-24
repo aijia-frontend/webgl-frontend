@@ -3,12 +3,9 @@ import CST from '@/common/cst/main'
 import { PolyLine, Line } from '@/common/geometry'
 import polygonArea from '@/common/polygonArea'
 import { getLoops } from '@/common/util/gTools'
+import { getPointsStr } from '@/common/util/pointUtil'
 import { minBy, maxBy } from 'lodash'
 import _cloneDeep from 'lodash/cloneDeep'
-
-const getPointsStr = pts => {
-  return pts.map(pt => pt.x + ' ' + pt.y).join(' ')
-}
 
 const Area = Model.extend({
   initialize () {

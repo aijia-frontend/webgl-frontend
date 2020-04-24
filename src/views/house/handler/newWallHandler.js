@@ -1,6 +1,7 @@
 import BaseHandler from './baseHandler'
 import DataStore from '../models/dataStore'
 import { Point, Line, PolyLine } from '@/common/geometry'
+import { changeStart } from '@/common/util/pointUtil'
 import _first from 'lodash/first'
 import NewJointHandler from './newJointHandler'
 
@@ -44,20 +45,14 @@ const NewWallHandler = BaseHandler.extend({
         this.attachWallHandler(wall, this.wall)
       // start || end overlap
       } else if (Point.equal(originPoints1[0], originPoints2[0])) {
-        this.changeStart(this.wall)
+        this.wall.attrs.points = changeStart(this.wall.points())
+        // this.changeStart(this.wall)
         this.attachWallHandler(this.wall, wall)
       } else if (Point.equal(originPoints1[1], originPoints2[1])) {
-        this.changeStart(this.wall)
+        this.wall.attrs.points = changeStart(this.wall.points())
         this.attachWallHandler(wall, this.wall)
       }
     }, this)
-  },
-
-  changeStart (wall) {
-    const points = wall.points()
-    const first3Pts = points.splice(0, 3)
-    points.push(...first3Pts)
-    wall.attrs.points = points
   },
 
   attachWallHandler (wall1, wall2) {

@@ -34,15 +34,12 @@ import floorFill from './floorFill'
 import wallFill from './wallFill'
 
 import CST from '@/common/cst/main'
+import { getPointsStr } from '@/common/util/pointUtil'
 
 const space = 100 // space = 500mm
 const gripCircleRadius = 30 // mm
 const snapCircleRadius = 45 // mm
 const snapTriangle = 45 // mm
-
-const getPointsStr = pts => {
-  return pts.map(pt => pt.x + ' ' + pt.y).join(' ')
-}
 
 export default {
   name: 'Def',

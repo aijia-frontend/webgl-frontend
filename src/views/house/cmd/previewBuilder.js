@@ -1,6 +1,7 @@
 import { Point } from '@/common/geometry'
 import CST from '@/common/cst/main'
 import SvgRenderer from '@/common/renderTools'
+import { getPointsStr } from '@/common/util/pointUtil'
 import DataStore from '../models/dataStore'
 import _clone from 'lodash/clone'
 
@@ -17,10 +18,6 @@ const CIRCLE = {
   attrs: {
     class: 'joint preview'
   }
-}
-
-const getPointsStr = pts => {
-  return pts.map(pt => pt.x + ' ' + pt.y).join(' ')
 }
 
 const PreViewBuilder = {
