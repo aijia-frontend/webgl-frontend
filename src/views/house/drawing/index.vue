@@ -6,7 +6,11 @@
     <div id="left">
       <leftTools style="z-index:99"></leftTools>
     </div>
-    <div id="footer"></div>
+    <div id="footer">
+      <span :class="{ hide: !posChange }">
+        position(x: {{ point.x }}, y: {{ point.y }})
+      </span>
+    </div>
     <div
       class="dimension"
       :style="{top: top, left: left, width: '100px'}"
@@ -39,7 +43,12 @@ export default {
       inputVisible: false,
       top: '0px',
       left: '0px',
-      length: 0
+      length: 0,
+      point: {
+        x: 0,
+        y: 0
+      },
+      posChange: false
     }
   },
   components: {
@@ -50,6 +59,7 @@ export default {
     this.$bus.$on('dimension', this.onDimension)
     this.$bus.$on('cancel', this.cmdEnd)
     this.$bus.$on('end', this.cmdEnd)
+    this.$bus.$on('posContent', this.posContent)
   },
   methods: {
     onDimension (data) {
@@ -63,6 +73,12 @@ export default {
     },
     cmdEnd () {
       this.inputVisible = false
+    },
+    posContent (v) {
+      this.posChange = !!v
+      if (v) {
+        this.point = v
+      }
     }
   }
 }
@@ -101,5 +117,8 @@ export default {
   }
   .dimension {
     position: absolute !important;
+  }
+  .hide {
+    display: none;
   }
 </style>

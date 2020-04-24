@@ -2,6 +2,8 @@ import BaseJig from '@/common/baseJig'
 import CST from '@/common/cst/main'
 import DataStore from '../models/dataStore'
 import Snap from '../snap/main'
+import Vue from 'vue'
+const vue = new Vue()
 
 const cancelBubble = function (e) {
   window.event ? window.event.cancelBubble = true : e.stopPropagation()
@@ -48,6 +50,7 @@ const Jig = BaseJig.extend({
   prepare () {},
 
   cleanup () {
+    vue.$bus.$emit('posContent', 0)
     Snap.reset({ func: 'reset' })
     BaseJig.prototype.cleanup.apply(this, arguments)
   },
