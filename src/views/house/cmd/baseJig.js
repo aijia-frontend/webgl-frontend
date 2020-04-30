@@ -76,6 +76,7 @@ const Jig = BaseJig.extend({
   onMouseDown (e) {
     if (e.button === 2) {
       this.pan = true
+      this.panStartT = new Date().getTime()
       this.panStart = this.getPosInView(e)
       this.drawing.setCursor('pan')
       this.tf = this.drawing.transform().clone()
@@ -84,6 +85,8 @@ const Jig = BaseJig.extend({
 
   onMouseMove (e) {
     if (this.pan && this.panStart) {
+      const time = new Date().getTime()
+      if (time - this.panStartT <= 100) return
       this.isMove = true
       const pos = this.getPosInView(e)
       const offset = {

@@ -21,8 +21,11 @@ const NewJointHandler = BaseHandler.extend({
     })
 
     this.updateWalls(data.walls, joint)
-    this.getChains(joint)
-    this.createArea()
+    if (!data.walls || !data.walls.length) console.warn('no walls, can not cocalate area')
+    else {
+      // this.getChains(this.data.walls[0])
+      // this.createArea()
+    }
     return joint
   },
 
@@ -133,6 +136,7 @@ const NewJointHandler = BaseHandler.extend({
   },
 
   run (data) {
+    data.walls = data.walls || []
     return this.createJoint(data)
   }
 })

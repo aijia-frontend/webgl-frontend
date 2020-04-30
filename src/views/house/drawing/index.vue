@@ -14,7 +14,8 @@
     <div
       class="dimension"
       :style="{top: top, left: left, width: '100px'}"
-      v-show="inputVisible">
+      v-show="inputVisible"
+      @click.right.prevent=";">
       <a-input
         ref="inputNumber"
         v-model="length"

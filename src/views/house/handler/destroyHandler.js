@@ -46,7 +46,7 @@ const DestroyHandler = BaseHandler.extend({
   },
 
   destroyEnt (ent) {
-    ent.destroy()
+    ent.destroy({ silent: true })
     this.destroyEnts.push(ent)
   },
 
@@ -136,8 +136,8 @@ const DestroyHandler = BaseHandler.extend({
 
   run (data) {
     this.destroy(data)
-
-    this.dataStore.destroy(this.destroyEnts)
+    this.destroyEnts.forEach(item => item.destroy())
+    // this.dataStore.destroy(this.destroyEnts)
   }
 })
 

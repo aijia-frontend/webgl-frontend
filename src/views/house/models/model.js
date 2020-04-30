@@ -15,7 +15,7 @@ _extend(Model.prototype, vue, {
   initialize (attrs, options) {
     this.attrs = attrs
     this.options = options
-    this.uid = UUID.generate()
+    this.uid = UUID.generate() + '-' + this.type
     this.origin = DataStore.origin
     // this.parent = attrs.parent
     // if (this.parent) this.render()
@@ -30,9 +30,9 @@ _extend(Model.prototype, vue, {
     if (!options.silent) this.onChange()
   },
 
-  destroy () {
+  destroy (options = { silent: false }) {
     this._isDestroyed = true
-    this.onChange()
+    if (!options.silent) vue.$bus.$emit('modelDestroy', this)
   },
 
   isDestroy () {

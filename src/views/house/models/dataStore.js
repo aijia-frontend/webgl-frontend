@@ -26,6 +26,7 @@ const DataStore = new Vue({
 
   created () {
     this.$bus.$on('modelChange', this.onChange)
+    this.$bus.$on('modelDestroy', this.onDestroy)
   },
 
   methods: {
@@ -114,6 +115,18 @@ const DataStore = new Vue({
 
       const index2 = _findIndex(this.ents, item => item.uid === model.uid)
       if (index2 > -1) this.ents[index2] = model
+    },
+
+    onDestroy (model) {
+      const type = model.type + 's'
+      const index = _findIndex(this[type], (item) => item.uid === model.uid)
+      if (index < 0) {
+        console.warn('can not find this ent. uid: ', model.uid)
+        return
+      }
+      this[type].splice(index, 1)
+      const index2 = _findIndex(this.ents, item => item.uid === model.uid)
+      if (index2 > -1) this.ents.splice(index2, 1)
     }
   }
 })

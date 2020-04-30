@@ -11,7 +11,7 @@
       :inlineCollapsed="collapsed">
       <a-sub-menu key="sub1">
         <span slot="title"><a-icon type="bank" /><span>户型</span></span>
-        <a-menu-item key="5" @click="cmdStart('drawWall')">画墙</a-menu-item>
+        <a-menu-item key="5" @click="cmdStart('drawWall', 0)">画墙</a-menu-item>
         <a-menu-item key="6">Option 6</a-menu-item>
       </a-sub-menu>
       <a-menu-item key="1">
@@ -51,7 +51,7 @@ export default {
     toggleCollapsed () {
       this.collapsed = !this.collapsed
     },
-    cmdStart (cmd) {
+    cmdStart (cmd, type) {
       // this.$bus.$on('start:' + cmd, this.buttonEnable.bind(this))
       // this.$bus.$on('end:' + cmd, this.cmdState.bind(this))
       // this.$bus.$on('cancel:' + cmd, this.cmdState.bind(this))
@@ -61,6 +61,8 @@ export default {
         // app: this.app,
         canvas: document.getElementById('svg'),
         drawing: DataStore.drawing
+      }, {
+        type
       })
     }
   }

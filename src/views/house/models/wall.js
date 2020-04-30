@@ -40,6 +40,7 @@ const Wall = Model.extend({
 
   addJoint (joint) {
     if (!this.attrs.joints) this.attrs.joints = []
+    if (this.attrs.joints.includes(joint)) return this
     this.attrs.joints.push(joint)
     this.onChange()
     return this
@@ -47,6 +48,7 @@ const Wall = Model.extend({
 
   remJoint (joint) {
     const index = this.attrs.joints.indexOf(joint)
+    if (index < 0) return this
     this.attrs.joints.splice(index, 1)
     this.onChange()
     return this

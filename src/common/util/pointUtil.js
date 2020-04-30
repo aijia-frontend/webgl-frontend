@@ -26,10 +26,11 @@ const changeStart = (points) => {
   return points
 }
 
-const getIntersect = (l1, l2) => {
+const getIntersect = (l1, l2, options) => {
+  options = Object.assign({}, { extend: true }, options || {})
   l1 = new Line(...l1)
   l2 = new Line(...l2)
-  return Line.intersect(l1, l2, { extend: true })
+  return Line.intersect(l1, l2, options)
 }
 
 const merge2Walls = (points1, points2) => {
@@ -65,5 +66,6 @@ export {
   pointAdd,
   pointRotate,
   changeStart,
+  getIntersect,
   merge2Walls
 }

@@ -21,6 +21,7 @@ const Joint = Model.extend({
 
   addWall (wallId) {
     if (!this.attrs.walls) this.attrs.walls = []
+    if (this.attrs.walls.includes(wallId)) return this
     this.attrs.walls.push(wallId)
     this.onChange()
     return this
@@ -28,17 +29,11 @@ const Joint = Model.extend({
 
   remWall (wallId) {
     const index = this.attrs.walls.indexOf(wallId)
-    if (index < 0) return
+    if (index < 0) return this
     this.attrs.walls.splice(index, 1)
     this.onChange()
     return this
   },
-
-  /* destroy () {
-    Model.prototype.destroy.apply(this, arguments)
-    const walls = this.walls()
-    walls.forEach(item )
-  }, */
 
   toJSON () {
     // save data

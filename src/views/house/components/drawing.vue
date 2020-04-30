@@ -214,7 +214,7 @@ export default {
         lPos.x = Math.round(lPos.x / this.defaultGidSpace) * this.defaultGidSpace
         lPos.y = Math.round(lPos.y / this.defaultGidSpace) * this.defaultGidSpace
       }
-      console.log('逻辑坐标：', lPos)
+      // console.log('逻辑坐标：', lPos)
       this.$bus.$emit('posContent', lPos)
 
       return CST.toPhysical(lPos, cstOptions)

@@ -284,6 +284,15 @@ _.extend(Line, {
     ])
 
     return cl > tol
+  },
+
+  nearestPoint (p1, p2, pt, options) {
+    options = _.defaults({}, options, {
+      extend: false
+    })
+    const line = new Line(p1, p2)
+
+    return line.nearestPoint(pt, options)
   }
 })
 
