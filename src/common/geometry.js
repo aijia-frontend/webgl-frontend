@@ -605,7 +605,7 @@ const Rect = function (args) {
     const xMax = _.maxBy(args, pt => pt.x).x
     const yMax = _.maxBy(args, pt => pt.y).y
     this.x = xMin
-    this.y = yMin
+    this.y = yMax
     this.width = xMax - xMin
     this.height = yMax - yMin
   } else {
@@ -701,14 +701,14 @@ _.extend(Rect.prototype, {
   leftBottom () {
     return {
       x: this.x,
-      y: this.y + this.height
+      y: this.y - this.height
     }
   },
 
   rightBottom () {
     return {
       x: this.x + this.width,
-      y: this.y + this.height
+      y: this.y - this.height
     }
   },
 

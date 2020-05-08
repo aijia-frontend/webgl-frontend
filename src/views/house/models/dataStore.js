@@ -4,6 +4,7 @@ import Factory from './factory'
 import _isObject from 'lodash/isObject'
 import _findIndex from 'lodash/findIndex'
 import _cloneDeep from 'lodash/cloneDeep'
+import { isInPolygon } from '@/common/util/gTools'
 
 const DataStore = new Vue({
   data: {
@@ -95,10 +96,26 @@ const DataStore = new Vue({
         const model = Factory.create(data)
         const type = model.type + 's'
         if (!this[type]) this[type] = []
-        this[type].push(model)
+        if (type === 'areas') { // 区域覆盖判断
+          this.areaAdd(this[type], model)
+        } else {
+          this[type].push(model)
+        }
         this.ents.push(model)
         return model
       }
+    },
+
+    areaAdd (coll, ent) {
+      // 倒叙遍历所有区域，若新区域遮挡其他区域，则该区域向下降一级，直到不存在遮挡
+      // 判断遮挡：有区域的点在该区域内 视为遮挡
+      const points = ent.points()
+      let index = coll.length
+      const collPoints = coll.map(item => item.points())
+      collPoints.forEach(pts => {
+        if (pts.find(pt => isInPolygon(pt, points) !== 'out')) index--
+      })
+      coll.splice(index, 0, ent)
     },
 
     onChange (model) {

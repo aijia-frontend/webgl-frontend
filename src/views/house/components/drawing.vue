@@ -43,7 +43,7 @@
           stroke-width="1"></line>
       </g>
     </g>
-    <container ref="container" :transform="tf.toString()"></container>
+    <container ref="container" :transform="tf.toString()" :tf="tf"></container>
     <!-- <g class="container" :transform="tf.toString()">
       <circle :cx="origin.x" :cy="origin.y" r="5" fill="none" stroke="red"></circle>
     </g> -->
@@ -309,12 +309,24 @@ export default {
       tf.scale(scale, scale)
       tf.translate(this.origin.x, this.origin.y)
       this.transform(tf)
+
+      return this
+    },
+
+    rotate (angle) {
+      const tf = this.transform().clone()
+      tf.rotate(angle)
+      this.transform(tf)
+
+      return this
     },
 
     pan (offset) {
       const tf = this.transform().clone()
       tf.translate(offset.x, offset.y)
       this.transform(tf)
+
+      return this
     },
 
     addContainer (data) {

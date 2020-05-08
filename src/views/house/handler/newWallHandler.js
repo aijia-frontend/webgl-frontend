@@ -141,10 +141,14 @@ const NewWallHandler = BaseHandler.extend({
       walls: [wall1, wall2, w3, w4]
     })
     if (wall1Joint) {
+      wall1Joint.remWall(wall1.uid)
+      wall1Joint.addWall(w3.uid)
       wall1.remJoint(wall1Joint.uid)
       w3.addJoint(wall1Joint.uid)
     }
     if (wall2Joint) {
+      wall2Joint.remWall(wall2.uid)
+      wall2Joint.addWall(w4.uid)
       wall2.remJoint(wall2Joint.uid)
       w4.addJoint(wall2Joint.uid)
     }
@@ -355,6 +359,8 @@ const NewWallHandler = BaseHandler.extend({
     this.updateEnt(wall2, { points: pts2 })
 
     if (wall1Joint) {
+      wall1Joint.remWall(wall1.uid)
+      wall1Joint.addWall(w3.uid)
       wall1.remJoint(wall1Joint.uid)
       w3.addJoint(wall1Joint.uid)
     }
