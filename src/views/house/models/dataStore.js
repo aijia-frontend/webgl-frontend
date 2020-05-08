@@ -60,6 +60,10 @@ const DataStore = new Vue({
         if (index < 0) return
         this.selectedEnts.splice(index, 1)
         const _ent = this.get(ent.uid)
+        if (!_ent) {
+          console.warn('can not find ent with uid: ', ent.uid)
+          return
+        }
         _ent.update({ isActive: false })
       }
     },

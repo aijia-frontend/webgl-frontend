@@ -248,7 +248,7 @@ export default {
       }
       if (tf.a >= maxScale) {
         console.log('can not zoom in. scale:', this.tf.a)
-        return
+        // return
       }
 
       this.transform(tf)
@@ -370,16 +370,16 @@ export default {
 </script>
 <style scoped>
   svg[cursor="arrow"] {
-    cursor: default;
-    /* cursor: url(../../../assets/cursor/selectCursor.png) 10 7, auto; */
+    /* cursor: default; */
+    cursor: url(../../../assets/cursor/selectCursor.png) 10 7, auto;
   }
   svg[cursor="cross"] {
-    cursor: crosshair;
-    /* cursor: url(../../../assets/cursor/crossCursor.png) 24 24, auto; */
+    /* cursor: crosshair; */
+    cursor: url(../../../assets/cursor/crossCursor.png) 24 24, auto;
   }
   svg[cursor="pan"] {
-    cursor: grabbing;
-    /* cursor: url(../../../assets/cursor/panCursor.png) 16 8, auto; */
+    /* cursor: grabbing; */
+    cursor: url(../../../assets/cursor/panCursor.png) 16 8, auto;
   }
 
   svg line,
