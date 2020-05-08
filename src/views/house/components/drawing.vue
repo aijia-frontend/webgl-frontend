@@ -248,7 +248,7 @@ export default {
       }
       if (tf.a >= maxScale) {
         console.log('can not zoom in. scale:', this.tf.a)
-        // return
+        return
       }
 
       this.transform(tf)
