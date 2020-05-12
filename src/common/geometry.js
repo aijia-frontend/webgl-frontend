@@ -680,7 +680,7 @@ _.extend(Rect.prototype, {
   center () {
     return {
       x: this.x + this.width * 0.5,
-      y: this.y + this.height * 0.5
+      y: this.y - this.height * 0.5
     }
   },
 

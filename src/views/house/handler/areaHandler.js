@@ -176,7 +176,9 @@ const AreaHandler = BaseHandler.extend({
   },
 
   run (walls) {
+    console.time('计算闭环')
     this.getChains(walls)
+    console.timeEnd('计算闭环')
     console.log('闭环：', this.chains)
     // new Chains
     this.createAreas()

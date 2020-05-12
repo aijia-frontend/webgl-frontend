@@ -1,5 +1,6 @@
 <template>
   <g class="areaInfo" :id="model.uid + 'Info'" :hidden="hidden" @click="onClick">
+    <!-- <circle :cx="textPos.x" :cy="textPos.y" :r="radius"></circle> -->
     <text :x="textPos.x" :y="textPos.y - 350">
       {{ name }}
     </text>
@@ -23,7 +24,8 @@ export default {
         y: 0
       },
       area: '',
-      name: ''
+      name: '',
+      radius: 0
     }
   },
   props: {
@@ -43,9 +45,10 @@ export default {
           tag: 'point',
           origin: DataStore.origin
         }
-        this.textPos = CST.toPhysical(this.model.centerPos(), options)
+        this.textPos = CST.toPhysical(this.model.centerPos().center, options)
         this.area = this.model.area()
         this.name = this.model.name()
+        this.radius = CST.mm.toPhysical(this.model.centerPos().radius)
         // this.hidden = this.tf.a <= 0.01 || this.area < 0.5
       },
       deep: true,
@@ -53,7 +56,7 @@ export default {
     },
     tf: {
       handler () {
-        this.hidden = this.tf.a <= 0.01/*  || this.area < 0.5 */
+        // this.hidden = this.tf.a <= 0.01/*  || this.area < 0.5 */
       },
       immediate: true
     }
