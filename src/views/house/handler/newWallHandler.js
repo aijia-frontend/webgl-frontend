@@ -34,8 +34,14 @@ const NewWallHandler = BaseHandler.extend({
   },
 
   createJoint (data) {
-    const newJointHandler = new NewJointHandler(this.attrs)
-    return newJointHandler.run(data)
+    let joint = DataStore.joints.find(item => Point.equal(item.position(), data.position))
+    if (joint) {
+      data.walls.forEach(wall => wall.addJOint(joint.uid))
+    } else {
+      const newJointHandler = new NewJointHandler(this.attrs)
+      joint = newJointHandler.run(data)
+    }
+    return joint
   },
 
   createWall (data) {
