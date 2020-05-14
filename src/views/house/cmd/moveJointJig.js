@@ -6,7 +6,8 @@ import CST from '@/common/cst/main'
 import Vector from '@/common/vector'
 // import _uniq from 'lodash/uniq'
 import _cloneDeep from 'lodash/cloneDeep'
-import { getPointsStr, pointAdd, pointRotate, changeStart, merge2Walls } from '@/common/util/pointUtil'
+import _sortBy from 'lodash/sortBy'
+import { getPointsStr, pointAdd, pointRotate, changeStart, getIntersect } from '@/common/util/pointUtil'
 
 const addToCollByPond = (pond, coll, ent) => {
   if (Array.isArray(ent)) {
@@ -20,6 +21,9 @@ const addToCollByPond = (pond, coll, ent) => {
   }
 }
 
+/*
+  查找直接相关墙体
+*/
 const getRefEntsMap = (joint) => {
   /* 当前节点
     不控制数量
@@ -89,11 +93,18 @@ const MoveJointJig = MoveJig.extend({
         }
         index += 1
         ref.originPoints = refPoints.map(this.point2Physical)
+        ref.angle = Vector.angle(ref.originPoints[0], ref.originPoints[3])
         ref.index = index
         return ref
       })
+      // 按照角度排序
+      item.refs = _sortBy(item.refs, ref => ref.angle)
       item.origin.originPoints = points.map(this.point2Physical)
+      item.origin.angle = Vector.angle(item.origin.originPoints[0], item.origin.originPoints[3])
     })
+    // 按照角度排序
+    this.refEntsMap = _sortBy(this.refEntsMap, chain => chain.origin.angle)
+    console.log('refEntsMap:', this.refEntsMap)
   },
 
   prepare () {
@@ -150,33 +161,57 @@ const MoveJointJig = MoveJig.extend({
   },
 
   updateOriginWalls (pos) {
-    if (this.refEntsMap.length === 2) {
-      const points0 = this.wallSeg(this.refEntsMap[0].origin, pos)
-      const points1 = changeStart(this.wallSeg(this.refEntsMap[1].origin, pos))
-      const intersInfo = merge2Walls(points1, points0)
-      points1[2] = points0[1] = intersInfo.inter1.point
-      points1[4] = points0[5] = intersInfo.inter2.point
-
-      this.refEntsMap[1].origin.points = changeStart(points1)
-      this.refEntsMap[0].origin.points = points0
-    }
+    // 模糊更新
+    this.refEntsMap.forEach(chain => {
+      chain.origin.points = this.wallSeg(chain.origin, pos)
+      chain.origin.angle = Vector.angle(chain.origin.points[0], chain.origin.points[3])
+    })
+    const refEntsMap = _sortBy(this.refEntsMap, chain => chain.origin.angle)
+    // joint位置 精确更新
+    const length = refEntsMap.length
+    let wallInfo1, wallInfo2
+    refEntsMap.forEach((chain, index) => {
+      wallInfo1 = chain.origin
+      wallInfo2 = refEntsMap[(index + 1) % length].origin
+      this.update2Walls(wallInfo1, wallInfo2)
+    })
+    // 更新相关墙体
     this.updateRefWalls()
   },
 
-  updateRefWalls () {
-    this.refEntsMap.forEach(item => {
-      const points0 = item.origin.points
-      item.refs.forEach(ref => {
-        const points1 = ref.originPoints
-        const intersInfo = merge2Walls(points0, points1)
-        points0[2] = points1[1] = intersInfo.inter1.point
-        points0[4] = points1[5] = intersInfo.inter2.point
-        ref.points = points1
-        item.origin.points = points0
+  // 相邻更新
+  /* 按照邻边更新 */
+  /* 逆转points0 */
+  /* next 更新points0[1]、points1[5] */
+  update2Walls (info1, info2) {
+    let points0 = changeStart(info1.points)
+    const points1 = info2.points
+    const intersect = getIntersect([points0[4], points0[5]], [points1[4], points1[5]])
+    points0[4] = points1[5] = intersect ? intersect.point : points0[4]
+    points0 = changeStart(points0)
 
-        SvgRenderer.attr(this.walls[ref.index], { points: getPointsStr(ref.points) })
+    SvgRenderer.attr(this.walls[info1.index], { points: getPointsStr(info1.points) })
+    SvgRenderer.attr(this.walls[info2.index], { points: getPointsStr(info2.points) })
+  },
+
+  updateRefWalls () {
+    let length, wallInfo2
+    this.refEntsMap.forEach(chain => {
+      if (!chain.refs || !chain.refs.length) return
+      let coll = []
+      chain.origin.points = changeStart(chain.origin.points)
+      chain.origin.angle = Vector.angle(chain.origin.points[0], chain.origin.points[3])
+      chain.refs.forEach(ref => {
+        ref.points = _cloneDeep(ref.originPoints)
       })
-      SvgRenderer.attr(this.walls[item.origin.index], { points: getPointsStr(item.origin.points) })
+      coll.push(...chain.refs, chain.origin)
+      coll = _sortBy(coll, item => item.angle)
+      length = coll.length
+      coll.forEach((item, index) => {
+        wallInfo2 = coll[(index + 1) % length]
+        this.update2Walls(item, wallInfo2)
+      })
+      chain.origin.points = changeStart(chain.origin.points)
     })
   },
 
