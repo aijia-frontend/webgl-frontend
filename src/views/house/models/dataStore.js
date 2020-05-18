@@ -5,6 +5,7 @@ import _isObject from 'lodash/isObject'
 import _findIndex from 'lodash/findIndex'
 import _cloneDeep from 'lodash/cloneDeep'
 import { isInPolygon } from '@/common/util/gTools'
+import { Point } from '@/common/geometry'
 
 const DataStore = new Vue({
   data: {
@@ -31,6 +32,70 @@ const DataStore = new Vue({
   },
 
   methods: {
+    flash (ent, time = 1000) {
+      const refs = []
+      switch (ent.type) {
+        case 'wall':
+          refs.push(...ent.joints())
+          break
+        case 'joint':
+          refs.push(...ent.walls())
+          break
+        case 'area':
+          refs.push(...ent.walls())
+          break
+        default:
+          break
+      }
+      ent.update({ isActive: true })
+      refs.forEach(item => item.update({ isActive: true }))
+      setTimeout(() => {
+        ent.update({ isActive: false })
+        refs.forEach(item => item.update({ isActive: false }))
+      }, time)
+    },
+    test (type, auto = true, index = 0) {
+      const ents = this[type + 's']
+      if (!auto) {
+        if (index < ents.length) {
+          this.flash(ents[index])
+          index++
+          setTimeout(() => this.test(type, auto, index), 1200)
+        }
+      } else {
+        const errors = ents.filter(ent => {
+          let has
+          switch (ent.type) {
+            case 'wall':
+              const points = ent.points()
+              const joints = ent.joints()
+              has = joints.find(joint => {
+                const position = joint.position()
+                return !Point.equal(position, points[0]) && !Point.equal(position, points[3])
+              })
+              break
+            case 'joint':
+              const position = ent.position()
+              const walls = ent.walls()
+              has = walls.find(wall => {
+                const points = wall.points()
+                return !Point.equal(position, points[0]) && !Point.equal(position, points[3])
+              })
+              break
+            case 'area':
+              // 检测各墙体是否都是首尾相连
+              break
+            default:
+              break
+          }
+          return !!has
+        })
+        console.log('错误关系：', errors)
+        if (errors.length === 0) console.log('//===>   未发现不合法的关系   <===//')
+        else errors.forEach(item => this.flash(item, 50000))
+      }
+    },
+
     get (uid) {
       return this.ents.find(item => item.uid === uid)
     },
