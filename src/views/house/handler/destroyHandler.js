@@ -107,12 +107,12 @@ const DestroyHandler = BaseHandler.extend({
   },
 
   updateWall (walls, joint) {
+    const pos = joint.position()
     if (walls.length === 1) {
       // 按照中线恢复
       // 更新位置
       const wall = walls[0]
       const points = wall.points()
-      const pos = joint.position()
       const ptIndex = _findIndex(points, pt => Point.equal(pt, pos))
       if (ptIndex < 0) throw new Error('must be there. wall:', wall, 'joint:', joint)
       const pt = points[ptIndex]
@@ -131,7 +131,61 @@ const DestroyHandler = BaseHandler.extend({
       wall.update({ points })
     } else {
       // 处理多面墙的情况
+      const destroyWall = this.destroyEnts.find((e) => e.type === 'wall') || {}
+      const destroyWallPoints = destroyWall.attrs.points
+      const destoryWallJointIndex = destroyWallPoints.findIndex((p) => Point.equal(p, pos))
+      if (destoryWallJointIndex < 0) {
+        console.warn('can not find joint of destory wall')
+        return false
+      }
+
+      const destoryWallOppositeIndex = (destoryWallJointIndex + 3) % 6
+      const dx = destroyWallPoints[destoryWallOppositeIndex].x - pos.x
+      const dy = destroyWallPoints[destoryWallOppositeIndex].y - pos.y
+      // y 轴相反 （dy取反）
+      const destoryWallRotation = Math.atan2(-dy, dx)
+
+      // 找出需要补的两堵墙
+      let positiveRotationWall = { rotation: Math.PI }
+      let negativeRotationWall = { rotation: -Math.PI }
+      for (const wall of walls) {
+        const wallPoints = wall.attrs.points
+        // 每堵墙连接点索引
+        const wallJointIndex = wallPoints.findIndex((p) => Point.equal(p, pos))
+        const wallOppositeIndex = (wallJointIndex + 3) % 6
+        const dx = wallPoints[wallOppositeIndex].x - pos.x
+        const dy = wallPoints[wallOppositeIndex].y - pos.y
+        const wallRotation = Math.atan2(-dy, dx)
+
+        const relativeRotation = wallRotation - destoryWallRotation
+        if (relativeRotation > 0 && relativeRotation <= positiveRotationWall.rotation) {
+          positiveRotationWall = { rotation: relativeRotation, wall, jointIndex: wallJointIndex }
+        }
+
+        if (relativeRotation < 0 && relativeRotation >= negativeRotationWall.rotation) {
+          negativeRotationWall = { rotation: relativeRotation, wall, jointIndex: wallJointIndex }
+        }
+      }
+      this.patchWall(positiveRotationWall.wall, positiveRotationWall.jointIndex)
+      this.patchWall(negativeRotationWall.wall, negativeRotationWall.jointIndex)
     }
+  },
+
+  patchWall (wall, wallPatchPointIndex) {
+    const wallPoints = wall.attrs.points
+    const wallL1 = new Line(wallPoints[1], wallPoints[2])
+    const wallL2 = new Line(wallPoints[5], wallPoints[4])
+    const wallP1 = wallL1.nearestPoint(wallPoints[wallPatchPointIndex], { extend: true })
+    const wallP2 = wallL2.nearestPoint(wallPoints[wallPatchPointIndex], { extend: true })
+    if (wallPatchPointIndex === 0) {
+      wallPoints[1] = wallP1
+      wallPoints[5] = wallP2
+    } else {
+      wallPoints[2] = wallP1
+      wallPoints[4] = wallP2
+    }
+
+    wall.update({ wallPoints })
   },
 
   run (data) {
