@@ -140,14 +140,12 @@ const DestroyHandler = BaseHandler.extend({
       }
 
       const destoryWallOppositeIndex = (destoryWallJointIndex + 3) % 6
-      const dx = destroyWallPoints[destoryWallOppositeIndex].x - pos.x
-      const dy = destroyWallPoints[destoryWallOppositeIndex].y - pos.y
-      // y 轴相反 （dy取反）
-      const destoryWallRotation = Math.atan2(-dy, dx)
+      const dx0 = destroyWallPoints[destoryWallOppositeIndex].x - pos.x
+      const dy0 = destroyWallPoints[destoryWallOppositeIndex].y - pos.y
 
       // 找出需要补的两堵墙
-      let positiveRotationWall = { rotation: Math.PI }
-      let negativeRotationWall = { rotation: -Math.PI }
+      let nearestWall1 = { angle: 360 }
+      let nearestWall2 = { angle: 0 }
       for (const wall of walls) {
         const wallPoints = wall.attrs.points
         // 每堵墙连接点索引
@@ -155,20 +153,29 @@ const DestroyHandler = BaseHandler.extend({
         const wallOppositeIndex = (wallJointIndex + 3) % 6
         const dx = wallPoints[wallOppositeIndex].x - pos.x
         const dy = wallPoints[wallOppositeIndex].y - pos.y
-        const wallRotation = Math.atan2(-dy, dx)
-
-        const relativeRotation = wallRotation - destoryWallRotation
-        if (relativeRotation > 0 && relativeRotation <= positiveRotationWall.rotation) {
-          positiveRotationWall = { rotation: relativeRotation, wall, jointIndex: wallJointIndex }
+        const angle = this.getAngle({
+          x: dx, y: dy
+        }, {
+          x: dx0, y: dy0
+        })
+        if (angle < nearestWall1.angle) {
+          nearestWall1 = { angle, wall, jointIndex: wallJointIndex }
         }
 
-        if (relativeRotation < 0 && relativeRotation >= negativeRotationWall.rotation) {
-          negativeRotationWall = { rotation: relativeRotation, wall, jointIndex: wallJointIndex }
+        if (angle > nearestWall2.angle) {
+          nearestWall2 = { angle, wall, jointIndex: wallJointIndex }
         }
       }
-      this.patchWall(positiveRotationWall.wall, positiveRotationWall.jointIndex)
-      this.patchWall(negativeRotationWall.wall, negativeRotationWall.jointIndex)
+      this.patchWall(nearestWall1.wall, nearestWall1.jointIndex)
+      this.patchWall(nearestWall2.wall, nearestWall2.jointIndex)
     }
+  },
+
+  getAngle ({ x: x1, y: y1 }, { x: x2, y: y2 }) {
+    const dot = x1 * x2 + y1 * y2
+    const det = x1 * y2 - y1 * x2
+    const angle = Math.atan2(det, dot) / Math.PI * 180
+    return Math.round(angle + 360) % 360
   },
 
   patchWall (wall, wallPatchPointIndex) {
