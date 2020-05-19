@@ -293,6 +293,11 @@ _.extend(Line, {
     const line = new Line(p1, p2)
 
     return line.nearestPoint(pt, options)
+  },
+
+  // 两条线是否垂直
+  isVertical (l1, l2) {
+    return l1.isVerticalTo(l2)
   }
 })
 
@@ -311,6 +316,13 @@ _.extend(Line.prototype, {
 
   isVertical () {
     return this.p1.x === this.p2.x
+  },
+
+  isVerticalTo (other) {
+    const vector = new Vector(this.p1, this.p2)
+    const otherVector = new Vector(other.p1, other.p2)
+    const angeleTo = Math.abs(vector.angleTo(otherVector))
+    return Math.abs(angeleTo - Math.PI / 2) <= DEFAULT_TOL || Math.abs(angeleTo - 3 * Math.PI / 2) <= DEFAULT_TOL
   },
 
   equal (other) {
