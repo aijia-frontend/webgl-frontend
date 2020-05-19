@@ -108,7 +108,7 @@ const AreaHandler = BaseHandler.extend({
     const wallInfo0 = _last(chain)
     const refWalls = getRefWalls(wallInfo0.wall)
     if (refWalls.length >= 1) { // 存在区域内中的墙 只有一个相关墙体
-      // 该链上的最后一个墙体关联墙体小于2个 不可能生成区域
+      // 该链上的最后一个墙体关联墙体小于1个 不可能生成区域
       // 查找与wall相连的一面墙
       const wallInfo = getConnectWallInfo(wallInfo0, chain, refWalls)
       if (wallInfo) {
@@ -177,6 +177,7 @@ const AreaHandler = BaseHandler.extend({
 
   run (walls) {
     console.time('计算闭环')
+    console.log('参与计算的墙体：', walls)
     this.getChains(walls)
     console.timeEnd('计算闭环')
     console.log('闭环：', this.chains)

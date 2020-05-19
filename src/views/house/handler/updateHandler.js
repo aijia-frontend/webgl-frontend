@@ -301,7 +301,7 @@ const UpdateHandler = BaseHandler.extend({
   run (data) {
     this.updateOrigins(data)
     this.wallsHandler(data)
-    const updates = data.filter(item => item.ent.type === 'wall').map(item => item.ent)
+    const updates = data.filter(item => item.ent.type === 'wall').map(item => this.dataStore.get(item.ent.uid))
     this.newWalls.push(...updates)
     this.areaHandler()
   }

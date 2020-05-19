@@ -299,9 +299,16 @@ const MoveJointJig = MoveJig.extend({
       const dis = Point.distance(this.startPos, this.endPos)
       if (dis >= 20) {
         const refs = []
+        let publicInfo
         this.refEntsMap.forEach(item => {
           addToColl(refs, Object.assign({}, item.origin, { isOrigin: true }))
-          addToColl(refs, item.refs)
+          item.refs.forEach(ref => {
+            if (ref.ent.isPublic) {
+              publicInfo = this.publicEnts.find(item => item.ent.uid === ref.ent.uid)
+              ref.points = publicInfo.points
+            }
+            addToColl(refs, ref)
+          })
         })
         this.data = [{
           ent: this.activeEnt,
