@@ -49,43 +49,57 @@ const findCenter = (pos, options) => {
   pos = toLogical(pos)
   let centerPos = null
   const walls = DataStore.walls
-  const pts = []
-  walls.forEach(wall => pts.push(Point.paramPoint(wall.start(), wall.end(), 0.5)))
-  pts.forEach(pt => {
-    if (Point.distance(pt, pos) < Tol) {
-      centerPos = pt
+  let point
+  const wall = walls.find(wall => {
+    point = Point.paramPoint(wall.start(), wall.end(), 0.5)
+    if (Point.distance(point, pos) < Tol) {
+      centerPos = point
       return true
     }
+    return false
   })
-  if (centerPos) {
+  if (wall) {
     centerPos = toPhysical(centerPos)
     snapRender(centerSnap)
     centerSnap.update(centerPos)
     centerSnap.show()
+    return {
+      wall,
+      snap: centerPos
+    }
   }
-
-  return centerPos
+  return null
 }
 
 const findEnd = (pos, options) => {
   pos = toLogical(pos)
   let endPos = null
   const walls = DataStore.walls
-  const pts = []
-  walls.forEach(wall => pts.push(wall.start(), wall.end()))
-  pts.find(pt => {
-    if (Point.distance(pt, pos) < Tol) {
-      endPos = pt
+  let point
+  const wall = walls.find(wall => {
+    point = wall.start()
+    if (Point.distance(point, pos) < Tol) {
+      endPos = point
       return true
     }
+    point = wall.end()
+    if (Point.distance(point, pos) < Tol) {
+      endPos = point
+      return true
+    }
+    return false
   })
-  if (endPos) {
+  if (wall) {
     endPos = toPhysical(endPos)
     snapRender(jointSnap)
     jointSnap.update(endPos)
     jointSnap.show()
+    return {
+      wall,
+      snap: endPos
+    }
   }
-  return endPos
+  return null
 }
 
 const findInsideWall = (pos, options) => {
@@ -100,7 +114,10 @@ const findInsideWall = (pos, options) => {
     wallInsideSnap.update(toPhysical(pos))
     wallInsideSnap.show()
   }
-  return null
+  return {
+    wall,
+    snap: toPhysical(pos)
+  }
 }
 
 const findHV = (start, pos, type) => {
@@ -167,13 +184,13 @@ const reset = (options) => {
 const find = (pos, options) => {
   let position = pos
   let wall = null
-  const snap = findEnd(pos, options) ||
+  const oSnap = findEnd(pos, options) ||
     findCenter(pos, options) ||
     findInsideWall(pos, options)
 
-  if (snap) {
-    position = snap
-    wall = true
+  if (oSnap) {
+    position = oSnap.snap
+    wall = oSnap.wall
   }
   const hv = findHVLine(pos, options)
   if (hv.hPos) {

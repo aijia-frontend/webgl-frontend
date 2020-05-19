@@ -49,14 +49,14 @@ export default {
         this.area = this.model.area()
         this.name = this.model.name()
         this.radius = CST.mm.toPhysical(this.model.centerPos().radius)
-        // this.hidden = this.tf.a <= 0.01 || this.area < 0.5
+        this.hidden = this.tf.a <= 0.01 || this.area < 0.5
       },
       deep: true,
       immediate: true
     },
     tf: {
       handler () {
-        // this.hidden = this.tf.a <= 0.01/*  || this.area < 0.5 */
+        this.hidden = this.tf.a <= 0.01 || this.area < 0.5
       },
       immediate: true
     }
@@ -79,5 +79,6 @@ export default {
   font-size: 600px;
   font-family: fantasy;
   text-shadow: rgb(243, 243, 243) -1.5px -1.5px 0px, rgb(243, 243, 243) -1.5px 1.5px 0px, rgb(243, 243, 243) 1.5px -1.5px 0px, rgb(243, 243, 243) 1.5px 1.5px 0px;
+  user-select: none;
 }
 </style>

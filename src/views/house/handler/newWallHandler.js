@@ -18,11 +18,6 @@ const isPtInside = (pts, pt) => {
 //   return walls.find(item => item.points().find(pt => Point.equal(pt, pos)))
 // }
 
-const hasJointOnPos = (wall, pos) => {
-  const joints = wall.joints()
-  return joints.find(joint => Point.equal(joint.position(), pos))
-}
-
 const NewWallHandler = BaseHandler.extend({
   initialize (attrs, options) {
     this.walls = DataStore.walls
@@ -36,7 +31,7 @@ const NewWallHandler = BaseHandler.extend({
   createJoint (data) {
     let joint = DataStore.joints.find(item => Point.equal(item.position(), data.position))
     if (joint) {
-      data.walls.forEach(wall => wall.addJOint(joint.uid))
+      data.walls.forEach(wall => wall.addJoint(joint.uid))
     } else {
       const newJointHandler = new NewJointHandler(this.attrs)
       joint = newJointHandler.run(data)
@@ -120,8 +115,8 @@ const NewWallHandler = BaseHandler.extend({
     const inter21 = getIntersect([pts1[4], pts1[5]], [pts2[1], pts2[2]])
     const inter22 = getIntersect([pts1[4], pts1[5]], [pts2[4], pts2[5]])
     // 墙体另一端的joint 从原墙体中移除 添加至新墙体
-    const wall1Joint = hasJointOnPos(wall1, pts1[3])
-    const wall2Joint = hasJointOnPos(wall2, pts2[3])
+    const wall1Joint = wall1.getJointOnPos(pts1[3])
+    const wall2Joint = wall2.getJointOnPos(pts2[3])
     let pts1u, pts1n, pts2u, pts2n
     if (inter11.p1 < inter12.p1) {
       pts1u = [pts1[0], pts1[1], inter11.point, inter00.point, inter21.point, pts1[5]]
@@ -137,9 +132,11 @@ const NewWallHandler = BaseHandler.extend({
     this.updateEnt(wall1, { points: pts1u })
     this.updateEnt(wall2, { points: pts2u })
     const w3 = this.createWall({
+      weight: wall1.weight(),
       points: pts1n
     })
     const w4 = this.createWall({
+      weight: wall2.weight(),
       points: pts2n
     })
     this.createJoint({
@@ -218,7 +215,7 @@ const NewWallHandler = BaseHandler.extend({
     // const wall2 = wallInfo2.wall
     const pts1 = wallInfo1.pts
     const pts2 = wallInfo2.pts
-    const joint = hasJointOnPos(wallInfo1.wall, intersect0)
+    const joint = wallInfo1.wall.getJointOnPos(intersect0)
     let intersect1 = getIntersect([pts1[1], pts1[2]], [pts2[1], pts2[2]], { extend: false })
     let intersect2 = getIntersect([pts1[4], pts1[5]], [pts2[4], pts2[5]], { extend: false })
     if (intersect1) {
@@ -336,7 +333,7 @@ const NewWallHandler = BaseHandler.extend({
     pts2[5] = inter2
     const p4 = Line.nearestPoint(pts1[param], pts1[param + 1], inter0)
     let pts3
-    const wall1Joint = hasJointOnPos(wall1, pts1[3])
+    const wall1Joint = wall1.getJointOnPos(pts1[3])
     if (param === 4) {
       pts3 = [inter0, inter2, pts1[2], pts1[3], pts1[4]]
       pts1[2] = inter1

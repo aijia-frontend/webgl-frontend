@@ -1,5 +1,5 @@
 <template>
-  <g class="joint" :class="{ active: isActive }" :hidden="hidden">
+  <g class="joint" :class="{ active: isActive }" :id="model.uid" :hidden="hidden">
     <circle :cx="position.x" :cy="position.y" :r="radius" @mousedown.left="onMove"></circle>
   </g>
 </template>

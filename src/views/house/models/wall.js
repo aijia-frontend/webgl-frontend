@@ -2,6 +2,7 @@ import Model from './model'
 import CST from '@/common/cst/main'
 import { getPointsStr } from '@/common/util/pointUtil'
 import _cloneDeep from 'lodash/cloneDeep'
+import { Point } from '@/common/geometry'
 
 const Wall = Model.extend({
   initialize () {
@@ -59,6 +60,11 @@ const Wall = Model.extend({
     const json = {}
 
     return json
+  },
+
+  getJointOnPos (pos) {
+    const joints = this.joints()
+    return joints.find(joint => Point.equal(joint.position(), pos))
   }
 })
 

@@ -160,6 +160,9 @@ const moveWallJig = MoveJig.extend({
   },
 
   onMouseUp (e) {
+    MoveJig.prototype.onMouseUp.apply(this, arguments)
+    if (e.button === 2) return
+
     if (this.endPos) {
       const dis = Point.distance(this.startPos, this.endPos)
       if (dis >= 20) {
