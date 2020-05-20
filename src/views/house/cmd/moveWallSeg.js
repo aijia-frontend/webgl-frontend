@@ -3,6 +3,7 @@ import wallSegJig from './wallSegJig'
 import CST from '@/common/cst/main'
 import DataStore from '../models/dataStore'
 import UpdateHandler from '../handler/updateHandler'
+import _pick from 'lodash/pick'
 
 const MoveWallSeg = JigCmd.extend({
   jigType: wallSegJig,
@@ -18,14 +19,22 @@ const MoveWallSeg = JigCmd.extend({
       origin: DataStore.origin
     })
 
-    data.forEach(item => {
-      if (item.points) {
-        item.points = item.points.map(toLogical)
+    const updates = data.map(item => {
+      return {
+        ent: item.ent,
+        isOrigin: item.isOrigin,
+        data: _pick(item, ['position', 'points'])
+      }
+    })
+
+    updates.forEach(item => {
+      if (item.data.points) {
+        item.data.points = item.data.points.map(toLogical)
       }
     })
 
     const handler = new UpdateHandler(this.attrs)
-    handler.run(data)
+    handler.run(updates)
 
     JigCmd.prototype.onEnd.apply(this, arguments)
   }

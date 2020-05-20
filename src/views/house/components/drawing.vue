@@ -163,6 +163,44 @@ export default {
       }).attrs
     },
 
+    loadUE (data, isAreas = true) {
+      const house = data.house
+      let pts
+      const walls = house.walls.map(wall => {
+        pts = wall.wallPoints.filter(pt => pt.z === 0).map(pt => {
+          return {
+            x: pt.y,
+            y: pt.x
+          }
+        })
+        return {
+          type: 'wall',
+          data: {
+            points: pts
+          }
+        }
+      })
+      const areas = house.roomList.map(item => {
+        pts = (isAreas ? item.areas : item.closedAreas).map(pt => {
+          return {
+            x: pt.y,
+            y: pt.x
+          }
+        })
+        return {
+          type: 'area',
+          data: {
+            name: item.roomName,
+            points: pts
+          }
+        }
+      })
+      console.log('墙========：', walls)
+      walls.forEach(DataStore.create)
+      console.log('区域========：', areas)
+      areas.forEach(DataStore.create)
+    },
+
     load () {
       window.dataStore = DataStore
       // test

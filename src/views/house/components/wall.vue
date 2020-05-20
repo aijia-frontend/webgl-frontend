@@ -3,8 +3,8 @@
     <polygon
       :points="pointsStr"
       @mousedown.left="onMove"></polygon>
-    <use :x="start.x" :y="start.y" xlink:href="#wall-end" @mousedown="onMoveSeg(end, start)"></use>
-    <use :x="end.x" :y="end.y" xlink:href="#wall-end" @mousedown="onMoveSeg(start, end)"></use>
+    <use :x="start.x" :y="start.y" xlink:href="#wall-end" @mousedown="onMoveSeg(3, 0)"></use>
+    <use :x="end.x" :y="end.y" xlink:href="#wall-end" @mousedown="onMoveSeg(0, 3)"></use>
   </g>
 </template>
 
@@ -63,11 +63,12 @@ export default {
     onMoveSeg (start, end) {
       if (!DataStore.activeCmd) {
         event.stopPropagation()
+        const pts = this.model.points()
         this.$bus.$emit('moveWallSeg', {
           drawing: DataStore.drawing,
           canvas: DataStore.drawing.$el,
-          start,
-          end,
+          start: pts[start],
+          end: pts[end],
           wall: this.model
         })
       }
