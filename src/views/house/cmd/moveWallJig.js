@@ -23,8 +23,12 @@ const addToColl = (coll, ents, escape) => {
 const getRefEnts = (wall) => {
   const joints = wall.joints()
   const refEnts = []
+  const _line = new Line(wall.start(), wall.end())
   joints.forEach(joint => {
-    const walls = joint.walls()
+    // const walls = joint.walls()
+    const walls = joint.walls().filter(item => {
+      return item.uid !== wall.uid && _line.isVerticalTo(new Line(item.start(), item.end()))
+    })
     addToColl(refEnts, walls, wall.uid)
   })
   refEnts.push(...joints)
