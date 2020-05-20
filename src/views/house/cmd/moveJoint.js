@@ -3,6 +3,7 @@ import MoveJointJig from './moveJointJig'
 import CST from '@/common/cst/main'
 import DataStore from '../models/dataStore'
 import UpdateHandler from '../handler/updateHandler'
+import _pick from 'lodash/pick'
 
 const MoveJoint = JigCmd.extend({
   jigType: MoveJointJig,
@@ -13,25 +14,29 @@ const MoveJoint = JigCmd.extend({
   },
 
   onEnd (data) {
+    const updates = data.map(item => {
+      return {
+        ent: item.ent,
+        isOrigin: item.isOrigin,
+        data: _pick(item, ['position', 'points'])
+      }
+    })
     const toLogical = (pt) => {
       return CST.toLogical(pt, {
         tag: 'point',
         origin: DataStore.origin
       })
     }
-    data.forEach(item => {
-      delete item.index
-      delete item.originPoints
-
-      if (item.points) {
-        item.points = item.points.map(toLogical)
-      } else if (item.position) {
-        item.position = toLogical(item.position)
+    updates.forEach(item => {
+      if (item.data.points) {
+        item.data.points = item.data.points.map(toLogical)
+      } else if (item.data.position) {
+        item.data.position = toLogical(item.data.position)
       }
     })
 
     const handler = new UpdateHandler(this.attrs)
-    handler.run(data)
+    handler.run(updates)
 
     JigCmd.prototype.onEnd.apply(this, arguments)
   }

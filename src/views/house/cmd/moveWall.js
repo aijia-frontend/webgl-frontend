@@ -19,10 +19,13 @@ const MoveWall = JigCmd.extend({
     })
 
     data.forEach(item => {
+      item.data = {} // 需要更新的数据
       if (item.points) {
-        item.points = item.points.map(toLogical)
+        item.data.points = item.points.map(toLogical)
+        delete item.points
       } else if (item.position) {
-        item.position = toLogical(item.position)
+        item.data.position = toLogical(item.position)
+        delete item.position
       }
     })
 

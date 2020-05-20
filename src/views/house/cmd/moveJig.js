@@ -1,7 +1,9 @@
 import Jig from './baseJig'
-import { Point } from '@/common/geometry'
-import CST from '@/common/cst/main'
+// import { Point } from '@/common/geometry'
+// import CST from '@/common/cst/main'
+import Snap from '../snap/main'
 import PreviewBuilder from './previewBuilder'
+import _cloneDeep from 'lodash/cloneDeep'
 
 const MoveJig = Jig.extend({
   initialize (attrs, options) {
@@ -46,13 +48,24 @@ const MoveJig = Jig.extend({
   update (pos) {
   },
 
-  onMouseUp (e) {
+  /* onMouseUp (e) {
     Jig.prototype.onMouseUp.apply(this, arguments)
 
     const pos = this.getPos(e)
     const dis = CST.mm.toLogical(Point.distance(pos, this.startPos))
     if (dis < 20) this.cancel()
     else this.end()
+  }, */
+
+  getPos (e) {
+    let pos = Jig.prototype.getPos.apply(this, arguments)
+    Snap.reset({ func: 'hide' })
+    const oSnap = Snap.find(_cloneDeep(pos), { start: _cloneDeep(this.startPos) })
+    if (oSnap) {
+      pos = oSnap.position
+    }
+    this.attachWall = oSnap && oSnap.wall
+    return pos
   },
 
   onMouseMove (e) {
