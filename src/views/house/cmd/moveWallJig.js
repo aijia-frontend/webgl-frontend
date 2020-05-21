@@ -8,7 +8,6 @@ import { getPointsStr, pointAdd, changeStart, merge2Walls } from '@/common/util/
 // import CST from '@/common/cst/main'
 // import PreviewBuilder from './previewBuilder'
 import _cloneDeep from 'lodash/cloneDeep'
-// const wallWeight = 140 // mm
 
 const addToColl = (coll, ents, escape) => {
   if (Array.isArray(ents)) {

@@ -3,7 +3,7 @@ import BaseCmd from './baseCmd.js'
 const JigCmd = BaseCmd.extend({
   initialize: function (attrs, options) {
     const JigType = this.jigType
-    this.jig = new JigType(attrs)
+    this.jig = new JigType(attrs, options)
     this.bindJig()
   },
 

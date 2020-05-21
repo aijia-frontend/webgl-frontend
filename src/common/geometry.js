@@ -83,12 +83,27 @@ _.extend(Point, {
       x,
       y
     }
+  },
+
+  addOffset (pt, offset) {
+    const x = pt.x + offset.x
+    const y = pt.y + offset.y
+    return {
+      x,
+      y
+    }
   }
 })
 
 _.extend(Point.prototype, {
   distance (other) {
     return Point.distance(this, other)
+  },
+
+  addOffset (offset) {
+    this.x += offset.x
+    this.y += offset.y
+    return this
   }
 })
 

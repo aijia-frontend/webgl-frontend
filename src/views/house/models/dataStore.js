@@ -7,6 +7,7 @@ import _cloneDeep from 'lodash/cloneDeep'
 import { isInPolygon } from '@/common/util/gTools'
 import { Point } from '@/common/geometry'
 
+const symbolTypes = ['window', 'door']
 const DataStore = new Vue({
   data: {
     frame: { // 视口 100(m) * 100(m)
@@ -20,7 +21,8 @@ const DataStore = new Vue({
     ents: [],
     walls: [],
     joints: [],
-    areas: []
+    areas: [],
+    windows: []
   },
 
   watch: {
@@ -94,6 +96,10 @@ const DataStore = new Vue({
         if (errors.length === 0) console.log('//===>   未发现不合法的关系   <===//')
         else errors.forEach(item => this.flash(item, 50000))
       }
+    },
+
+    symbols () {
+      return this.ents.filter(item => symbolTypes.includes(item.type))
     },
 
     get (uid) {

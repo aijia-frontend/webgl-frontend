@@ -1,5 +1,5 @@
 import CST from '@/common/cst/main'
-import { Point } from '@/common/geometry'
+import { Point, Line } from '@/common/geometry'
 import { isInPolygon } from '@/common/util/gTools'
 import DataStore from '../models/dataStore'
 import RefSnap from './refSnap'
@@ -169,6 +169,30 @@ const findHVLine = (pos, options) => {
   }
 }
 
+const findWallLine = (pos, options) => {
+  pos = toLogical(pos)
+  let line, dist, snap
+  let tol = options.tol || Tol
+  const wall = DataStore.walls.find(item => {
+    if (options.tol) tol = item.weight()
+    if (options.type === 'center') {
+      line = new Line(item.start(), item.end())
+      dist = Point.distance(line.nearestPoint(pos), pos)
+      if (dist <= tol) {
+        snap = line.nearestPoint(pos)
+        return true
+      }
+      return false
+    }
+  })
+  if (wall) {
+    return {
+      snap: toPhysical(snap),
+      wall
+    }
+  } else return null
+}
+
 const snapRender = (snap) => {
   const drawing = DataStore.drawing
   if (!snap.el) {
@@ -212,7 +236,22 @@ const find = (pos, options) => {
   }
 }
 
+const findLine = (pos, options) => {
+  let position = pos
+  let wall
+  const oSnap = findWallLine(pos, options)
+  if (oSnap) {
+    position = oSnap.snap
+    wall = oSnap.wall
+  }
+  return {
+    position,
+    wall
+  }
+}
+
 export default {
   reset,
-  find
+  find,
+  findLine
 }
