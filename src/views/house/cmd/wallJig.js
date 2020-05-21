@@ -7,7 +7,7 @@ import Snap from '../snap/main'
 import _cloneDeep from 'lodash/cloneDeep'
 import { getPointsStr, pointAdd, pointRotate } from '@/common/util/pointUtil'
 // import PreViewBuilder from './previewBuilder'
-const wallWeight = 140 // mm
+import config from '@/config/houseDrawing'
 
 const polygon = {
   tag: 'polygon',
@@ -28,6 +28,7 @@ const line = {
 const wallJig = Jig.extend({
   initialize (attrs, options) {
     Jig.prototype.initialize.apply(this, arguments)
+    this.wallWeight = config.wall.weight
     if (this.attrs.startPos) {
       this.startPos = this.attrs.startPos
     }
@@ -59,7 +60,7 @@ const wallJig = Jig.extend({
     this.$bus.$emit('dimension', {
       pos: this.drawing.getPosFromView(Point.paramPoint(this.points[1], this.points[2], 0.5)),
       length: Point.distance(startL, endL),
-      wallWeight
+      wallWeight: this.wallWeight
     })
   },
 
@@ -69,7 +70,7 @@ const wallJig = Jig.extend({
     const angle = Vector.angle(this.startPos, pos)
     const pxPerMM = CST.mm.toPhysical(1)
     const point = {
-      x: this.startPos.x + wallWeight * pxPerMM * 0.5,
+      x: this.startPos.x + this.wallWeight * pxPerMM * 0.5,
       y: this.startPos.y
     }
     const offset = {
@@ -95,7 +96,7 @@ const wallJig = Jig.extend({
       this.data.points = this.points
       this.data.startPos = this.startPos
       this.data.endPos = pos
-      this.data.weight = wallWeight
+      this.data.weight = this.wallWeight
       this.end()
     }
   },
@@ -120,7 +121,7 @@ const wallJig = Jig.extend({
         this.$bus.$emit('dimension', {
           pos: { x: 0, y: 0 },
           length: 0,
-          wallWeight
+          wallWeight: this.wallWeight
         })
         Jig.prototype.onMouseUp.apply(this, arguments)
       } else {

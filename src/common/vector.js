@@ -71,6 +71,14 @@ _.extend(Vector, {
 
   angleBetween: function (first, second) {
     return first.angle() - second.angle()
+  },
+
+  multiply: function (vector, v) {
+    var x = vector.x * v
+    var y = vector.y * v
+    var z = vector.z * v
+
+    return new Vector(x, y, z)
   }
 })
 
@@ -103,6 +111,14 @@ _.extend(Vector.prototype, {
     this.x -= other.x
     this.y -= other.y
     this.z -= other.z
+
+    return this
+  },
+
+  multiply: function (v) {
+    this.x *= v
+    this.y *= v
+    this.z *= v
 
     return this
   },

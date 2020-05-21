@@ -26,6 +26,9 @@
     <g id="wall-center-snap" class="snap">
       <polygon :points="pointsStr"></polygon>
     </g>
+    <g id="symbol-end">
+      <circle cx="0" cy="0" :r="radiusGrip"></circle>
+    </g>
   </defs>
 </template>
 <script>
@@ -142,5 +145,11 @@ export default {
     stroke: #ffffff;
     stroke-width: 5mm;
     fill: #327DFF;
+  }
+
+  #symbol-end circle {
+    fill: #ffffff;
+    stroke: #4B96FF;
+    stroke-width: 6mm
   }
 </style>

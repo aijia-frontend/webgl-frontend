@@ -2,6 +2,10 @@
 import { each as _each } from 'lodash'
 import DataStore from '../models/dataStore'
 import DrawWall from './drawWall'
+import AddDoor from './addDoor'
+import AddWindow from './addWindow'
+import AddFabric from './addFabric'
+
 import Destroy from './destroy'
 import Pan from './pan'
 import MoveWallSeg from './moveWallSeg'
@@ -14,6 +18,10 @@ new Vue({
   data: {
     registry: {
       drawWall: DrawWall,
+      addDoor: AddDoor,
+      addWindow: AddWindow,
+      addFabric: AddFabric,
+
       pan: Pan,
       destroy: Destroy,
       moveWallSeg: MoveWallSeg,

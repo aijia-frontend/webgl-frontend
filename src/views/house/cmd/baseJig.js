@@ -36,6 +36,7 @@ const Jig = BaseJig.extend({
 
   initialize (attrs, options) {
     this.attrs = attrs
+    this.options = options
     this.drawing = attrs.drawing
     this.data = {}
     this.dataStore = DataStore

@@ -4,11 +4,11 @@ import SvgRenderer from '@/common/renderTools'
 import { getPointsStr } from '@/common/util/pointUtil'
 import DataStore from '../models/dataStore'
 import _clone from 'lodash/clone'
+import Vector from '@/common/vector'
 
 const POLYGON = {
   tag: 'polygon',
   attrs: {
-    class: 'wall preview',
     points: ''
   }
 }
@@ -20,6 +20,25 @@ const CIRCLE = {
   }
 }
 
+const LINE = {
+  tag: 'line',
+  attrs: {}
+}
+
+const getWindowPtsAround = (attrs) => {
+  const offsetW = new Vector(attrs.width / 2, 0) // 中心点到窗户短边的向量
+  offsetW.rotateZ(attrs.angle || 0) // 窗户的角度
+  const offsetD = new Vector(0, attrs.deepth / 2) // 中心点到窗户长边的向量
+  offsetD.rotateZ(attrs.angle || 0)
+  const center = new Point(0, 0) // 中心点
+  const p1 = _clone(center).addOffset(offsetW).addOffset(offsetD)
+  const p2 = _clone(center).addOffset(offsetW).addOffset(Vector.multiply(offsetD, -1))
+  const p3 = _clone(center).addOffset(Vector.multiply(offsetW, -1)).addOffset(Vector.multiply(offsetD, -1))
+  const p4 = _clone(center).addOffset(Vector.multiply(offsetW, -1)).addOffset(offsetD)
+
+  return [p1, p2, p3, p4]
+}
+
 const PreViewBuilder = {
   ptTfOptions: {
     tag: 'point',
@@ -27,6 +46,7 @@ const PreViewBuilder = {
   },
   wall (attrs, options) {
     const polygon = _clone(POLYGON)
+    polygon.attrs.class = 'wall preview'
     if (options.isModel) {
       attrs = {
         points: attrs.pointsStr()
@@ -69,8 +89,57 @@ const PreViewBuilder = {
     return SvgRenderer.render(circle)
   },
 
-  build (ent) {
-    return this[ent.type](ent, { isModel: true })
+  /* 构造窗的临时图形 */
+  /*
+  attrs: {
+    width // 宽度
+    deepth // 深度
+    angle // 角度
+  }
+   */
+  window (attrs, options) {
+    if (options.isModel) {
+      attrs = {}
+    }
+    const window = {
+      tag: 'g',
+      attrs: {
+        class: 'window preview'
+      },
+      nodes: []
+    }
+    // 外边框的点位
+    const polygon = _clone(POLYGON)
+    const pts = getWindowPtsAround(attrs)
+    polygon.attrs.points = getPointsStr(pts)
+
+    // 内部两条线
+    const p1 = Point.paramPoint(pts[0], pts[1], 1 / 3)
+    const p2 = Point.paramPoint(pts[0], pts[1], 2 / 3)
+    const p3 = Point.paramPoint(pts[3], pts[2], 1 / 3)
+    const p4 = Point.paramPoint(pts[3], pts[2], 2 / 3)
+
+    const line1 = _clone(LINE)
+    line1.attrs = {
+      x1: p1.x,
+      y1: p1.y,
+      x2: p3.x,
+      y2: p3.y
+    }
+    const line2 = _clone(LINE)
+    line2.attrs = {
+      x1: p2.x,
+      y1: p2.y,
+      x2: p4.x,
+      y2: p4.y
+    }
+    window.nodes.push(polygon, line1, line2)
+
+    return SvgRenderer.render(window)
+  },
+
+  build (ent, options = { isModel: true }) {
+    return this[ent.type](ent, options)
   }
 }
 
