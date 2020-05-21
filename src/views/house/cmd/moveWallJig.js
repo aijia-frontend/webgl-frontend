@@ -86,7 +86,7 @@ const moveWallJig = MoveJig.extend({
     })
 
     this.refWall = this.refEntsData[this.refEntsData.length - 1]
-    if (this.refWall) {
+    if (this.refWall && this.refWall.originPoints) {
       const originPoints = this.refWall.originPoints
       const originLine = new Line(originPoints[0], originPoints[3])
       this.startPos = originLine.ptProjection(this.startPos)
