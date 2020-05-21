@@ -75,11 +75,21 @@ const DestroyHandler = BaseHandler.extend({
   destroyArea (area) {
     this.destroyEnt(area)
 
-    // 删除只存在两堵墙的节点
-    const joints = area.joints()
-    joints.forEach(joint => {
-      if (joint.attrs.walls.length === 2) this.destroyJoint(joint)
-    }, this)
+    const otherAreas = this.dataStore.areas.filter((a) => a.uid !== area.uid)
+    const areaWalls = area.walls()
+    for (const wall of areaWalls) {
+      let isWallInOtherArea = false
+      for (const a of otherAreas) {
+        const wallInOtherAreaIndex = a.walls().findIndex((w) => w.uid === wall.uid)
+        if (wallInOtherAreaIndex >= 0) {
+          isWallInOtherArea = true
+          break
+        }
+      }
+      if (!isWallInOtherArea) {
+        this.destroyWall(wall)
+      }
+    }
   },
 
   jointHandler () {
