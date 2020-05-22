@@ -1,6 +1,7 @@
 import BaseHandler from './baseHandler'
 import _findIndex from 'lodash/findIndex'
 import { Point, Line } from '@/common/geometry'
+import UpdateHandler from './updateHandler'
 // import DestroyWallHandler from './destroyWallHandler'
 
 const DestroyHandler = BaseHandler.extend({
@@ -8,6 +9,7 @@ const DestroyHandler = BaseHandler.extend({
     this.destroyEnts = []
     this.refJoints = []
     this.refAreas = []
+    this.walls = []
     BaseHandler.prototype.initialize.apply(this, arguments)
   },
 
@@ -42,7 +44,7 @@ const DestroyHandler = BaseHandler.extend({
     })
 
     this.jointHandler()
-    this.areaHandler()
+    // this.areaHandler()
   },
 
   destroyEnt (ent) {
@@ -73,11 +75,21 @@ const DestroyHandler = BaseHandler.extend({
   destroyArea (area) {
     this.destroyEnt(area)
 
-    // 删除只存在两堵墙的节点
-    const joints = area.joints()
-    joints.forEach(joint => {
-      if (joint.attrs.walls.length === 2) this.destroyJoint(joint)
-    }, this)
+    const otherAreas = this.dataStore.areas.filter((a) => a.uid !== area.uid)
+    const areaWalls = area.walls()
+    for (const wall of areaWalls) {
+      let isWallInOtherArea = false
+      for (const a of otherAreas) {
+        const wallInOtherAreaIndex = a.walls().findIndex((w) => w.uid === wall.uid)
+        if (wallInOtherAreaIndex >= 0) {
+          isWallInOtherArea = true
+          break
+        }
+      }
+      if (!isWallInOtherArea) {
+        this.destroyWall(wall)
+      }
+    }
   },
 
   jointHandler () {
@@ -85,8 +97,12 @@ const DestroyHandler = BaseHandler.extend({
       const joint = this.dataStore.get(item)
       if (joint.isDestroy()) return
       const walls = joint.walls().filter(item => !item.isDestroy())
+      this.walls = this.walls.concat(walls)
       if (walls.length < 2) {
         this.destroyEnt(joint)
+        walls.forEach((w) => {
+          w.remJoint(joint.uid)
+        })
       } else {
         joint.attrs.walls = []
         walls.forEach(wall => joint.addWall(wall.uid))
@@ -96,21 +112,36 @@ const DestroyHandler = BaseHandler.extend({
   },
 
   areaHandler () {
-    if (this.refAreas.length === 1) { // destroy || update
-      const area = this.dataStore.get(this.refAreas[0])
-      // 如果区域不能闭合 则删除
-      // if (area.isClosed) // update else destory
-      this.destroyEnt(area)
-    } else { // merge
-
+    const walls = []
+    for (const wall of this.walls) {
+      walls.push({
+        data: {
+          points: wall.attrs.points
+        },
+        ent: wall
+      })
     }
+    const joints = []
+    for (const refJoint of this.refJoints) {
+      const joint = this.dataStore.get(refJoint)
+      if (joint) {
+        joints.push({
+          data: {
+            position: joint.attrs.position
+          },
+          ent: joint
+        })
+      }
+    }
+    const updateHandler = new UpdateHandler(this.attrs)
+    updateHandler.run(walls.concat(joints))
   },
 
   updateWall (walls, joint) {
-    const pos = joint.position()
     if (walls.length === 1) {
       // 按照中线恢复
       // 更新位置
+      const pos = joint.position()
       const wall = walls[0]
       const points = wall.points()
       const ptIndex = _findIndex(points, pt => Point.equal(pt, pos))
@@ -130,67 +161,15 @@ const DestroyHandler = BaseHandler.extend({
       wall.remJoint(joint.uid)
       wall.update({ points })
     } else {
-      // 处理多面墙的情况
-      const destroyWall = this.destroyEnts.find((e) => e.type === 'wall') || {}
-      const destroyWallPoints = destroyWall.attrs.points
-      const destoryWallJointIndex = destroyWallPoints.findIndex((p) => Point.equal(p, pos))
-      if (destoryWallJointIndex < 0) {
-        console.warn('can not find joint of destory wall')
-        return false
-      }
-
-      const destoryWallOppositeIndex = (destoryWallJointIndex + 3) % 6
-      const dx = destroyWallPoints[destoryWallOppositeIndex].x - pos.x
-      const dy = destroyWallPoints[destoryWallOppositeIndex].y - pos.y
-      // y 轴相反 （dy取反）
-      const destoryWallRotation = Math.atan2(-dy, dx)
-
-      // 找出需要补的两堵墙
-      let positiveRotationWall = { rotation: Math.PI }
-      let negativeRotationWall = { rotation: -Math.PI }
-      for (const wall of walls) {
-        const wallPoints = wall.attrs.points
-        // 每堵墙连接点索引
-        const wallJointIndex = wallPoints.findIndex((p) => Point.equal(p, pos))
-        const wallOppositeIndex = (wallJointIndex + 3) % 6
-        const dx = wallPoints[wallOppositeIndex].x - pos.x
-        const dy = wallPoints[wallOppositeIndex].y - pos.y
-        const wallRotation = Math.atan2(-dy, dx)
-
-        const relativeRotation = wallRotation - destoryWallRotation
-        if (relativeRotation > 0 && relativeRotation <= positiveRotationWall.rotation) {
-          positiveRotationWall = { rotation: relativeRotation, wall, jointIndex: wallJointIndex }
-        }
-
-        if (relativeRotation < 0 && relativeRotation >= negativeRotationWall.rotation) {
-          negativeRotationWall = { rotation: relativeRotation, wall, jointIndex: wallJointIndex }
-        }
-      }
-      this.patchWall(positiveRotationWall.wall, positiveRotationWall.jointIndex)
-      this.patchWall(negativeRotationWall.wall, negativeRotationWall.jointIndex)
+      const updateHandler = new UpdateHandler(this.attrs)
+      updateHandler.updateWallsBaseJoint(joint)
     }
-  },
-
-  patchWall (wall, wallPatchPointIndex) {
-    const wallPoints = wall.attrs.points
-    const wallL1 = new Line(wallPoints[1], wallPoints[2])
-    const wallL2 = new Line(wallPoints[5], wallPoints[4])
-    const wallP1 = wallL1.nearestPoint(wallPoints[wallPatchPointIndex], { extend: true })
-    const wallP2 = wallL2.nearestPoint(wallPoints[wallPatchPointIndex], { extend: true })
-    if (wallPatchPointIndex === 0) {
-      wallPoints[1] = wallP1
-      wallPoints[5] = wallP2
-    } else {
-      wallPoints[2] = wallP1
-      wallPoints[4] = wallP2
-    }
-
-    wall.update({ wallPoints })
   },
 
   run (data) {
     this.destroy(data)
     this.destroyEnts.forEach(item => item.destroy())
+    this.areaHandler()
     // this.dataStore.destroy(this.destroyEnts)
   }
 })
