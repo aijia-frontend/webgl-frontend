@@ -1,6 +1,6 @@
 import BaseHandler from './baseHandler'
 import { PolyLine, Line, Point } from '@/common/geometry'
-import { cloneDeep, sortBy } from 'lodash'
+import { cloneDeep, sortBy, compact } from 'lodash'
 import { getIntersect, changeStart } from '@/common/util/pointUtil'
 import Vector from '@/common/vector'
 import AreaHandler from './areaHandler'
@@ -30,6 +30,7 @@ const UpdateHandler = BaseHandler.extend({
     this.existWalls = this.dataStore.walls
     this.existJoints = this.dataStore.joints
     this.newWalls = []
+    this.updateWalls = []
 
     /*
     {
@@ -56,7 +57,8 @@ const UpdateHandler = BaseHandler.extend({
 
   updateData (data) {
     const ent = data.ent
-    ent.update(data.data)
+    ent.update(data.data, data.options || {})
+    if (ent.type === 'wall') addToColl(this.updateWalls, ent)
   },
 
   updateTarget (target) {
@@ -74,7 +76,9 @@ const UpdateHandler = BaseHandler.extend({
     const polyLine1 = new PolyLine(wall.points())
     let polyLine2, intersects
     // 1.获取所有相关的墙体
-    const walls = this.existWalls.concat(this.newWalls)
+    const walls = []
+    addToColl(walls, this.existWalls)
+    addToColl(walls, this.newWalls) /* this.existWalls.concat(this.newWalls) */
     let relationships = walls.filter(item => {
       // 2.移除已经存在关系的墙体
       if (item.uid === wall.uid || isConnext2Walls(wall, item)) return false
@@ -86,7 +90,7 @@ const UpdateHandler = BaseHandler.extend({
     /* 中心交点在当前墙体的joint处 */
     const line1 = new Line(wall.start(), wall.end())
     let line2, intersect, type
-    relationships = relationships.map(item => {
+    relationships = compact(relationships.map(item => {
       line2 = new Line(item.start(), item.end())
       intersect = Line.intersect(line1, line2)
       intersect = getIntersect([wall.start(), wall.end()], [item.start(), item.end()])
@@ -105,18 +109,19 @@ const UpdateHandler = BaseHandler.extend({
       else {
         // need fix-- 当中心相交在延长线上时，要先处理下：把中心点放到交点处
         // 改变type为0或者1
-        if (intersect.p1 < 0 || intersect.p1 > 1) {
+        /* if (intersect.p1 < 0 || intersect.p1 > 1) {
           type = 0
         } else if (intersect.p2 < 0 || intersect.p2 > 1) {
           type = 1
-        }
+        } */
+        return null
       }
       return {
         ent: item,
         intersect,
         type
       }
-    })
+    }))
     // realShips 按照p1排序
     return sortBy(relationships, item => item.intersect.p1)
   },
@@ -176,7 +181,15 @@ const UpdateHandler = BaseHandler.extend({
     pts1[2] = pts2[1] = p0
     pts1[3] = pts2[0] = intersect
     pts1[4] = pts2[5] = p1
-    wall.update({ points: pts1 }, { silent: true })
+    this.updateData({
+      ent: wall,
+      data: {
+        points: pts1
+      },
+      options: {
+        silent: true
+      }
+    })
     const wall2 = this.createEnt({
       type: 'wall',
       data: {
@@ -269,7 +282,14 @@ const UpdateHandler = BaseHandler.extend({
       this.update2Walls(next, item)
     })
 
-    wallsInfo.forEach(item => item.ent.update({ points: item.isChange ? changeStart(item.points) : item.points }))
+    wallsInfo.forEach(item => {
+      this.updateData({
+        ent: item.ent,
+        data: {
+          points: item.isChange ? changeStart(item.points) : item.points
+        }
+      })
+    })
   },
 
   // 相邻更新
@@ -290,20 +310,22 @@ const UpdateHandler = BaseHandler.extend({
     })
   },
 
-  areaHandler () {
+  areaHandler (updates) {
     this.deleteAreas.forEach(area => area.destroy())
     const areaHandler = new AreaHandler({
       attrs: this.attrs
     })
-    areaHandler.run(this.newWalls)
+    areaHandler.run(updates)
   },
 
   run (data) {
     this.updateOrigins(data)
     this.wallsHandler(data)
-    const updates = data.filter(item => item.ent.type === 'wall').map(item => this.dataStore.get(item.ent.uid))
-    this.newWalls.push(...updates)
-    this.areaHandler()
+    let updates = []
+    addToColl(updates, this.newWalls)
+    addToColl(updates, this.updateWalls)
+    updates = updates.map(item => this.dataStore.get(item.uid))
+    this.areaHandler(updates)
   }
 })
 
