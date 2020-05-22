@@ -75,9 +75,13 @@ const getConnectWallInfo = (currentInfo, chain, refWalls) => {
 const getPoints = (chain) => {
   const points = []
   chain.forEach(item => {
-    points.push(item.wall.points()[item.param])
+    points.push(getPoint(item))
   })
   return points
+}
+
+const getPoint = (chainItem) => {
+  return chainItem.wall.points()[chainItem.param]
 }
 
 const AreaHandler = BaseHandler.extend({
@@ -112,7 +116,8 @@ const AreaHandler = BaseHandler.extend({
       // 查找与wall相连的一面墙
       const wallInfo = getConnectWallInfo(wallInfo0, chain, refWalls)
       if (wallInfo) {
-        if (wallInfo.isSelf || wallInfo.wall.uid !== _first(chain).wall.uid) { // 继续查
+        // 首尾两点不重合
+        if (/* wallInfo.isSelf ||  */ !Point.equal(getPoint(wallInfo), getPoint(_first(chain))) /* wallInfo.wall.uid !== _first(chain).wall.uid */) { // 继续查
           chain.push(wallInfo)
           this.getChain(chain)
         } else { // 闭环
