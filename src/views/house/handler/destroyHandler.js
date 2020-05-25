@@ -121,7 +121,7 @@ const DestroyHandler = BaseHandler.extend({
         ent: wall
       })
     }
-    const joints = []
+    /* const joints = []
     for (const refJoint of this.refJoints) {
       const joint = this.dataStore.get(refJoint)
       if (joint) {
@@ -132,9 +132,9 @@ const DestroyHandler = BaseHandler.extend({
           ent: joint
         })
       }
-    }
+    } */
     const updateHandler = new UpdateHandler(this.attrs)
-    updateHandler.run(walls.concat(joints))
+    updateHandler.run(walls)
   },
 
   updateWall (walls, joint) {
