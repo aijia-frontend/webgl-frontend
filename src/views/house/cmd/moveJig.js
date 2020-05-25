@@ -70,6 +70,9 @@ const MoveJig = Jig.extend({
 
   onMouseMove (e) {
     Jig.prototype.onMouseMove.apply(this, arguments)
+    if (!this.startPos) return
+    const pos = this.getPos(e)
+    this.update(pos)
   }
 })
 

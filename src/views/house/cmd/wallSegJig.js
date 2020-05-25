@@ -1,13 +1,15 @@
-import Jig from './baseJig'
+import MoveJig from './moveJig'
 import SvgRenderer from '@/common/renderTools'
 import Vector from '@/common/vector'
-import { Point } from '@/common/geometry'
+import { Point, Line } from '@/common/geometry'
 import CST from '@/common/cst/main'
 import { getPointsStr, pointAdd, pointRotate, changeStart, getIntersect } from '@/common/util/pointUtil'
 import PreviewBuilder from './previewBuilder'
 // import DataStore from '../models/dataStore'
 import _cloneDeep from 'lodash/cloneDeep'
 import _sortBy from 'lodash/sortBy'
+import Snap from '../snap/main'
+import Matrix from '@/common/matrix'
 
 const line = {
   tag: 'polyline',
@@ -17,9 +19,14 @@ const line = {
   }
 }
 
-const wallSegJig = Jig.extend({
+const getRefEnts = (walls, ents, dataStore) => {
+  const wallIds = walls.map(item => item.uid)
+  ents.push(...dataStore.symbols().filter(item => item.attrs.wall && wallIds.includes(item.attrs.wall)))
+}
+
+const wallSegJig = MoveJig.extend({
   initialize (attrs, options) {
-    Jig.prototype.initialize.apply(this, arguments)
+    MoveJig.prototype.initialize.apply(this, arguments)
     this.wall = attrs.wall
     this.wallWeight = this.wall.weight()
     if (this.attrs.start) {
@@ -41,9 +48,39 @@ const wallSegJig = Jig.extend({
       this.initRefWallsData(joints[0])
     }
 
+    /* 绑定墙体 */
+    /* 注意
+      由于param，wall的points要用原始的顺序, 所以更新过程中要确保不能改变墙体的原始点位顺序
+     */
+    this.refSymbols = []
+    getRefEnts([this.wall], this.refSymbols, this.dataStore)
+    this.activeEnts.push(...this.refSymbols)
+
+    this.initSymbolsData()
+
     // 隐藏
     this.drawing.hide(this.activeEnts)
-    Jig.prototype.start.apply(this, arguments)
+    MoveJig.prototype.start.apply(this, arguments)
+  },
+
+  /*
+  {
+    ent
+    param: 在墙上的相对位置
+  }
+   */
+  initSymbolsData () {
+    let wall, originPoints, line, param
+    this.refSymbols = this.refSymbols.map(item => {
+      wall = item.getWall()
+      originPoints = wall.originPoints()
+      line = new Line(originPoints[0], originPoints[1])
+      param = line.pointParam(item.getPosition())
+      return {
+        ent: item,
+        param
+      }
+    })
   },
 
   initRefWallsData (joint) {
@@ -66,50 +103,40 @@ const wallSegJig = Jig.extend({
         isChange
       }
     })
-    this.refWalls = _sortBy(this.refWalls, item => item.angle).map((item, index) => {
-      return Object.assign(item, { index })
-    })
+    this.refWalls = _sortBy(this.refWalls, item => item.angle)
   },
 
   cleanup () {
     this.drawing.show(this.activeEnts)
-    Jig.prototype.cleanup.apply(this, arguments)
+    MoveJig.prototype.cleanup.apply(this, arguments)
   },
 
   prepare () {
     // 添加临时图形
     this.preview = {
-      activeEnt: PreviewBuilder.build(this.wall),
       line: SvgRenderer.render(line)
     }
-    this.drawing.addTransient(this.preview.activeEnt)
+    this.preview[this.wall.uid] = PreviewBuilder.build(this.wall)
+    this.drawing.addTransient(this.preview[this.wall.uid])
     this.drawing.addTransient(this.preview.line)
     // 添加关联图形
-    let type = ''
     let tryout = null
     this.refWalls.forEach(item => {
-      type = item.ent.type + 's'
-      if (!this[type]) this[type] = []
       tryout = PreviewBuilder.build(item.ent)
+      this.preview[item.ent.uid] = tryout
       this.drawing.addTransient(tryout)
-      this[type].push(tryout)
+    })
+    // symbols
+    this.refSymbols.forEach(item => {
+      tryout = PreviewBuilder.build(item.ent)
+      this.preview[item.ent.uid] = tryout
+      this.drawing.addTransient(tryout)
     })
   },
 
   update (pos) {
     SvgRenderer.attr(this.preview.line, { points: getPointsStr([this.startPos, pos]) })
     this.updateWall(pos)
-    /* const options = {
-      tag: 'point',
-      origin: this.dataStore.origin
-    }
-    const startL = CST.toLogical(this.points[0], options)
-    const endL = CST.toLogical(this.points[3], options)
-    this.$bus.$emit('dimension', {
-      pos: this.drawing.getPosFromView(Point.paramPoint(this.points[1], this.points[2], 0.5)),
-      length: Point.distance(startL, endL),
-      wallWeight: this.wallWeight
-    }) */
   },
 
   updateWall (pos) {
@@ -131,10 +158,12 @@ const wallSegJig = Jig.extend({
     const p4 = pointAdd(p3, offset)
     const points = [this.startPos, p1, p2, pos, p4, p3]
     this.points = points
+
+    this.updateSymbols()
     if (this.refWalls.length) {
       this.updateRefWalls()
     } else {
-      SvgRenderer.attr(this.preview.activeEnt, { points: getPointsStr(this.points) })
+      SvgRenderer.attr(this.preview[this.wall.uid], { points: getPointsStr(this.points) })
     }
   },
 
@@ -149,10 +178,8 @@ const wallSegJig = Jig.extend({
     points0[4] = points1[5] = intersect ? intersect.point : points0[4]
     points0 = changeStart(points0)
 
-    const preview1 = info1.index < 0 ? this.preview.activeEnt : this.walls[info1.index]
-    const preview2 = info2.index < 0 ? this.preview.activeEnt : this.walls[info2.index]
-    SvgRenderer.attr(preview1, { points: getPointsStr(info1.points) })
-    SvgRenderer.attr(preview2, { points: getPointsStr(info2.points) })
+    SvgRenderer.attr(this.preview[info1.ent.uid], { points: getPointsStr(info1.points) })
+    SvgRenderer.attr(this.preview[info2.ent.uid], { points: getPointsStr(info2.points) })
   },
 
   updateRefWalls () {
@@ -160,12 +187,12 @@ const wallSegJig = Jig.extend({
     walls.forEach(item => {
       item.points = _cloneDeep(item.originPoints)
     })
-    walls.push({
+    const wallInfo = {
       ent: this.wall,
       points: _cloneDeep(this.points),
-      angle: Vector.angle(this.points[0], this.points[3]),
-      index: -1
-    })
+      angle: Vector.angle(this.points[0], this.points[3])
+    }
+    walls.push(wallInfo)
     walls = _sortBy(walls, item => item.angle)
     const length = walls.length
     let next
@@ -174,16 +201,26 @@ const wallSegJig = Jig.extend({
       this.update2Walls(item, next)
     })
 
-    this.points = walls.find(item => item.index < 0).points
+    this.points = wallInfo.points
+  },
 
-    /* this.refWalls.forEach(ent => {
-      const points = ent.originPoints
-      const inters = merge2Walls(this.points)
-    }) */
+  updateSymbols () {
+    const angle = Vector.angle(this.points[0], this.points[3])
+    let position, tf
+    // let position, wall
+    this.refSymbols.forEach(item => {
+      position = Point.paramPoint(this.points[0], this.points[3], item.param)
+      tf = Matrix.identity()
+      tf.rotate(angle)
+      tf.translate(position.x, position.y)
+      SvgRenderer.attr(this.preview[item.ent.uid], { transform: tf.toString() })
+      item.angle = angle
+      item.position = position
+    })
   },
 
   onMouseUp (e) {
-    Jig.prototype.onMouseUp.apply(this, arguments)
+    MoveJig.prototype.onMouseUp.apply(this, arguments)
     if (e.button === 2) return
 
     const pos = this.getPos(e)
@@ -198,15 +235,29 @@ const wallSegJig = Jig.extend({
         points: this.points,
         isOrigin: true
       })
+      this.data.push(...this.refSymbols)
       this.end()
     }
   },
 
-  onMouseMove (e) {
-    Jig.prototype.onMouseMove.apply(this, arguments)
+  /* onMouseMove (e) {
+    MoveJig.prototype.onMouseMove.apply(this, arguments)
     if (!this.startPos) return
     const pos = this.getPos(e)
     this.update(pos)
+  }, */
+
+  getPos (e) {
+    let pos = this.drawing.posInContent({
+      x: e.pageX,
+      y: e.pageY
+    })
+    const oSnap = Snap.findLine(_cloneDeep(pos), { type: 'center', tol: 150 })
+    if (oSnap) {
+      pos = oSnap.position
+    }
+
+    return pos
   }
 })
 

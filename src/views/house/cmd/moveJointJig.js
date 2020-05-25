@@ -78,6 +78,7 @@ const MoveJointJig = MoveJig.extend({
     this.activeEnts = []
     this.activeEnts.push(...this.refEnts, this.activeEnt)
     this.initData()
+    this.refSymbols = []
 
     MoveJig.prototype.start.apply(this, arguments)
   },
@@ -87,26 +88,22 @@ const MoveJointJig = MoveJig.extend({
     // 在不同链上的 同一个墙
     this.publicEnts = []
     // chain
-    let points, refPoints
-    let index = -1
+    let points, refPoints, changeS
     this.refEntsMap.forEach(item => {
       points = item.origin.ent.points()
       if (Point.equal(item.origin.ent.end(), this.originPosition)) {
         points = changeStart(points)
+        item.startChange = true
       }
-      index += 1
-      item.origin.index = index
       item.refs = item.refs.map(ref => {
         refPoints = ref.ent.points()
-        let changeS = false
+        changeS = false
         if (Point.equal(ref.ent.end(), points[3])) {
           changeS = true
           refPoints = changeStart(refPoints)
         }
         ref.startChange = changeS
-        index += 1
         ref.originPoints = refPoints.map(this.point2Physical)
-        ref.index = index
         ref.angle = Vector.angle(ref.originPoints[0], ref.originPoints[3])
         if (ref.ent.isPublic) {
           const publicEnt = this.publicEnts.find(item => item.ent.uid === ref.ent.uid)
@@ -114,14 +111,11 @@ const MoveJointJig = MoveJig.extend({
             this.publicEnts.push({
               ent: ref.ent,
               originPoints: ref.originPoints,
-              // points: _cloneDeep(ref.originPoints),
-              index: index,
               startChange: changeS,
               use: false
             })
           } else {
             ref.index = publicEnt.index
-            index--
           }
         }
         return ref
@@ -139,7 +133,7 @@ const MoveJointJig = MoveJig.extend({
 
   prepare () {
     // 添加关联图形
-    let type = ''
+    this.preview = {}
     let tryout = null
     let publicInfo
     this.refEnts.forEach(ent => {
@@ -147,17 +141,13 @@ const MoveJointJig = MoveJig.extend({
       if (publicInfo && publicInfo.hasRender) return
       if (publicInfo) publicInfo.hasRender = true
       if (ent.uid === this.activeEnt.uid) return
-      type = ent.type + 's'
-      if (!this[type]) this[type] = []
       tryout = PreviewBuilder.build(ent)
+      this.preview[ent.uid] = tryout
       this.drawing.addTransient(tryout)
-      this[type].push(tryout)
     }, this)
 
     // 添加临时图形
-    this.preview = {
-      activeEnt: PreviewBuilder.build(this.activeEnt)
-    }
+    this.preview.activeEnt = PreviewBuilder.build(this.activeEnt)
     this.drawing.addTransient(this.preview.activeEnt)
   },
 
@@ -229,8 +219,8 @@ const MoveJointJig = MoveJig.extend({
     points0[4] = points1[5] = intersect ? intersect.point : points0[4]
     points0 = changeStart(points0)
 
-    SvgRenderer.attr(this.walls[info1.index], { points: getPointsStr(info1.points) })
-    SvgRenderer.attr(this.walls[info2.index], { points: getPointsStr(info2.points) })
+    SvgRenderer.attr(this.preview[info1.ent.uid], { points: getPointsStr(info1.points) })
+    SvgRenderer.attr(this.preview[info2.ent.uid], { points: getPointsStr(info2.points) })
   },
 
   updateRefWalls () {
@@ -282,13 +272,6 @@ const MoveJointJig = MoveJig.extend({
       if (publicInfo.startChange !== info.startChange) points = changeStart(points)
       publicInfo.points = points
     }
-  },
-
-  onMouseMove (e) {
-    MoveJig.prototype.onMouseMove.apply(this, arguments)
-    if (!this.startPos) return
-    const pos = this.getPos(e)
-    this.update(pos)
   },
 
   onMouseUp (e) {

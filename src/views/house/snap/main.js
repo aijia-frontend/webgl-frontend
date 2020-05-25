@@ -4,7 +4,7 @@ import { isInPolygon } from '@/common/util/gTools'
 import DataStore from '../models/dataStore'
 import RefSnap from './refSnap'
 import LineSnap from './lineSnap'
-const Tol = 50 // mm
+const Tol = 100 // mm
 
 const newRefSnap = (refId) => {
   return new RefSnap({

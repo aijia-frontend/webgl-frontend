@@ -55,11 +55,6 @@ export default {
     // this.wall.$view = this
   },
   methods: {
-    onClick () {
-      if (DataStore.activeCmd) return
-      DataStore.addSelected(this.model)
-    },
-
     onMoveSeg (start, end) {
       if (!DataStore.activeCmd) {
         event.stopPropagation()

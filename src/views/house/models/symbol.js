@@ -1,6 +1,10 @@
 import Model from './model'
 
 const Symbol = Model.extend({
+  angle () {
+    return this.attrs.angle
+  },
+
   getWall () {
     let wall = null
     if (this.attrs.wall) wall = this.getRefEnt(this.attrs.wall)
