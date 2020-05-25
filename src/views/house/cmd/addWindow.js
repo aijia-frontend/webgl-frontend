@@ -16,16 +16,18 @@ const AddWindow = JigCmd.extend({
   },
 
   onEnd (data) {
-    data.width = CST.mm.toLogical(data.width)
-    data.deepth = CST.mm.toLogical(data.deepth)
+    const position = data.position
+    data.width = parseInt(CST.mm.toLogical(data.width))
+    data.deepth = parseInt(CST.mm.toLogical(data.deepth))
     data.position = CST.toLogical(data.position, { tag: 'point', origin: DataStore.origin })
+    data.angle = CST.toLogical(data.angle, { tag: 'angle' })
 
     const handler = new NewSymbolHandler(this.attrs)
     handler.run(data)
 
     JigCmd.prototype.onEnd.apply(this, arguments)
 
-    vue.$bus.$emit('addWindow', this.attrs, this.options)
+    vue.$bus.$emit('addWindow', this.attrs, Object.assign(this.options, { position, wall: null }))
   }
 })
 

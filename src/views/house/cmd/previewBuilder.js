@@ -2,9 +2,10 @@ import { Point } from '@/common/geometry'
 import CST from '@/common/cst/main'
 import SvgRenderer from '@/common/renderTools'
 import { getPointsStr } from '@/common/util/pointUtil'
+import Vector from '@/common/vector'
+import Matrix from '@/common/matrix'
 import DataStore from '../models/dataStore'
 import _clone from 'lodash/clone'
-import Vector from '@/common/vector'
 
 const POLYGON = {
   tag: 'polygon',
@@ -27,9 +28,9 @@ const LINE = {
 
 const getWindowPtsAround = (attrs) => {
   const offsetW = new Vector(attrs.width / 2, 0) // 中心点到窗户短边的向量
-  offsetW.rotateZ(attrs.angle || 0) // 窗户的角度
+  // offsetW.rotateZ(attrs.angle || 0) // 窗户的角度
   const offsetD = new Vector(0, attrs.deepth / 2) // 中心点到窗户长边的向量
-  offsetD.rotateZ(attrs.angle || 0)
+  // offsetD.rotateZ(attrs.angle || 0)
   const center = new Point(0, 0) // 中心点
   const p1 = _clone(center).addOffset(offsetW).addOffset(offsetD)
   const p2 = _clone(center).addOffset(offsetW).addOffset(Vector.multiply(offsetD, -1))
@@ -99,18 +100,30 @@ const PreViewBuilder = {
    */
   window (attrs, options) {
     if (options.isModel) {
-      attrs = {}
+      attrs = {
+        angle: CST.toPhysical(attrs.angle(), { tag: 'angle' }),
+        position: CST.toPhysical(attrs.getPosition(), { tag: 'point', origin: DataStore.origin }),
+        width: CST.mm.toPhysical(attrs.width()),
+        deepth: CST.mm.toPhysical(attrs.deepth())
+      }
     }
+    const tf = Matrix.identity()
+    tf.rotate(attrs.angle)
+    tf.translate(attrs.position.x, attrs.position.y)
+
     const window = {
       tag: 'g',
       attrs: {
-        class: 'window preview'
+        class: 'window preview',
+        transform: tf.toString()
       },
       nodes: []
     }
+
     // 外边框的点位
     const polygon = _clone(POLYGON)
     const pts = getWindowPtsAround(attrs)
+    polygon.attrs.class = ''
     polygon.attrs.points = getPointsStr(pts)
 
     // 内部两条线

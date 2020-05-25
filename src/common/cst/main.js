@@ -3,6 +3,7 @@ import './point'
 import './rect'
 import './line'
 import './polygon'
+import './angle'
 import Dispatch from './dispatch'
 const CST = {
   toLogical (data, options) {

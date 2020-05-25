@@ -5,7 +5,7 @@
     :id="model.uid"
     :hidden="hidden"
     :transform="tf.toString()"
-    @click="onClick">
+    @mousedown.left="onMove">
     <polygon class="bbox" :points="pointsStr"></polygon>
     <line
       v-for="line in lines"
@@ -23,10 +23,8 @@
 import CST from '@/common/cst/main'
 import { getPointsStr } from '@/common/util/pointUtil'
 import { Point } from '@/common/geometry'
-import Vector from '@/common/vector'
 import matrix from '@/common/matrix'
 import DataStore from '../models/dataStore'
-import _clone from 'lodash/clone'
 
 export default {
   name: 'Window',
@@ -56,10 +54,10 @@ export default {
   watch: {
     model: {
       handler (newV, old) {
-        const points = this.getPointsAround(_clone(this.model.attrs))
+        const points = this.model.getPointsAround().map(pt => this.toPhysical(pt))
         this.getLines(points)
         this.pointsStr = getPointsStr(points)
-        const position = this.toPhysical(this.model.getPositioin())
+        const position = this.toPhysical(this.model.getPosition(), DataStore.origin)
         this.tf = matrix.identity().translate(position.x, position.y)
         this.isActive = this.model.attrs.isActive
       },
@@ -71,27 +69,11 @@ export default {
     // this.wall.$view = this
   },
   methods: {
-    toPhysical (pt) {
+    toPhysical (pt, origin) {
       return CST.toPhysical(pt, {
         tag: 'point',
-        origin: DataStore.origin
+        origin: origin
       })
-    },
-
-    getPointsAround (attrs) {
-      const width = CST.mm.toPhysical(attrs.width)
-      const deepth = CST.mm.toPhysical(attrs.deepth)
-      const offsetW = new Vector(width / 2, 0) // 中心点到窗户短边的向量
-      offsetW.rotateZ(attrs.angle) // 窗户的角度
-      const offsetD = new Vector(0, deepth / 2) // 中心点到窗户长边的向量
-      offsetD.rotateZ(attrs.angle)
-      const center = new Point(0, 0) // 中心点
-      const p1 = _clone(center).addOffset(offsetW).addOffset(offsetD)
-      const p2 = _clone(center).addOffset(offsetW).addOffset(Vector.multiply(offsetD, -1))
-      const p3 = _clone(center).addOffset(Vector.multiply(offsetW, -1)).addOffset(Vector.multiply(offsetD, -1))
-      const p4 = _clone(center).addOffset(Vector.multiply(offsetW, -1)).addOffset(offsetD)
-
-      return [p1, p2, p3, p4]
     },
 
     getLines (pts) {
@@ -122,11 +104,6 @@ export default {
       this.lines = [line1, line2]
     },
 
-    onClick () {
-      if (DataStore.activeCmd) return
-      DataStore.addSelected(this.model)
-    },
-
     onMoveSeg (start, end) {
       if (!DataStore.activeCmd) {
         event.stopPropagation()
@@ -137,6 +114,12 @@ export default {
       if (!DataStore.activeCmd) {
         event.stopPropagation()
         DataStore.addSelected(this.model)
+        /* this.$bus.$emit('moveWall', {
+          drawing: DataStore.drawing,
+          canvas: DataStore.drawing.$el,
+          activeEnt: this.model,
+          startPos: this.toPhysical(this.model.getPosition())
+        }) */
       }
     }
   }

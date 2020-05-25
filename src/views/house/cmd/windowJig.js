@@ -19,6 +19,7 @@ const windowJig = Jig.extend({
     this.position = this.options.position || { x: 0, y: 0 }
     this.windowAttrs = {
       type: 'window',
+      position: this.position,
       width: CST.mm.toPhysical(windowConfig.width),
       deepth: this.deepth,
       angle: 0
@@ -32,6 +33,7 @@ const windowJig = Jig.extend({
     }
 
     const tf = Matrix.identity()
+    tf.rotate(this.angle || 0)
     tf.translate(this.position.x, this.position.y)
     SvgRenderer.attr(this.preview.symbol, { transform: tf.toString() })
 
@@ -41,8 +43,7 @@ const windowJig = Jig.extend({
   update (pos) {
     if (this.wall) { // 重新计算临时图形
       this.windowAttrs.deepth = CST.mm.toPhysical(this.wall.weight())
-      this.angleL = Vector.angle(this.wall.start(), this.wall.end())
-      this.windowAttrs.angle = Vector.angle(this.point2Physical(this.wall.start()), this.point2Physical(this.wall.end()))
+      this.angle = Vector.angle(this.point2Physical(this.wall.start()), this.point2Physical(this.wall.end()))
       this.preview.symbol.remove()
       this.prepare()
     } else if (this.wallLost) {
@@ -51,7 +52,8 @@ const windowJig = Jig.extend({
       this.prepare()
     }
     const tf = Matrix.identity()
-    tf.translate(pos.x, pos.y)
+    tf.rotate(this.angle || 0)
+    tf.translate(this.position.x, this.position.y)
 
     SvgRenderer.attr(this.preview.symbol, { transform: tf.toString() })
   },
@@ -71,7 +73,7 @@ const windowJig = Jig.extend({
     this.data.position = this.position
     this.data.wall = this.wall
     this.data.class = this.options.type
-    // this.data.angle = this.angleL || 0
+    this.data.angle = this.angle || 0
     this.end()
   },
 
@@ -81,7 +83,7 @@ const windowJig = Jig.extend({
       y: e.pageY
     })
     Snap.reset({ func: 'hide' })
-    const oSnap = Snap.findLine(_cloneDeep(pos), { type: 'center', tol: 100 })
+    const oSnap = Snap.findLine(_cloneDeep(pos), { type: 'center', tol: 150 })
     if (oSnap) {
       pos = oSnap.position
     }

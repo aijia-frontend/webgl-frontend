@@ -23,13 +23,19 @@ const MoveWallSeg = JigCmd.extend({
       return {
         ent: item.ent,
         isOrigin: item.isOrigin,
-        data: _pick(item, ['position', 'points'])
+        data: _pick(item, ['position', 'points', 'angle'])
       }
     })
 
     updates.forEach(item => {
       if (item.data.points) {
         item.data.points = item.data.points.map(toLogical)
+      }
+      if (item.data.position) {
+        item.data.position = toLogical(item.data.position)
+      }
+      if (item.data.angle) {
+        item.data.angle = CST.toLogical(item.data.angle, { tag: 'angle' })
       }
     })
 
