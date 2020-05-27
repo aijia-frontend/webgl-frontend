@@ -39,6 +39,10 @@ _extend(Model.prototype, vue, {
     return this._isDestroyed
   },
 
+  isActive () {
+    return this.attrs.isActive
+  },
+
   onChange () {
     vue.$bus.$emit('modelChange', this)
   },

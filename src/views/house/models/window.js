@@ -9,8 +9,12 @@ const Window = Symbol.extend({
     Symbol.prototype.initialize.apply(this, arguments)
   },
 
-  getPosition () {
+  position () {
     return _clone(this.attrs.position)
+  },
+
+  angle () {
+    return _clone(this.attrs.angle)
   },
 
   width () {

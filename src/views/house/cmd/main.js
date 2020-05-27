@@ -8,9 +8,12 @@ import AddFabric from './addFabric'
 
 import Destroy from './destroy'
 import Pan from './pan'
-import MoveWallSeg from './moveWallSeg'
-import MoveWall from './moveWall'
 import MoveJoint from './moveJoint'
+import MoveWall from './moveWall'
+import MoveWallSeg from './moveWallSeg'
+import MoveSymbol from './moveSymbol'
+import MoveSymbolSeg from './moveSymbolSeg'
+
 import Vue from 'vue'
 
 // eslint-disable-next-line no-new
@@ -24,9 +27,11 @@ new Vue({
 
       pan: Pan,
       destroy: Destroy,
-      moveWallSeg: MoveWallSeg,
+      moveJoint: MoveJoint,
       moveWall: MoveWall,
-      moveJoint: MoveJoint
+      moveWallSeg: MoveWallSeg,
+      moveSymbol: MoveSymbol,
+      moveSymbolSeg: MoveSymbolSeg
     },
     activeCmd: null
   },

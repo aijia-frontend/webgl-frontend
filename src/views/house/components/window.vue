@@ -14,8 +14,8 @@
       :y1="line.y1"
       :x2="line.x2"
       :y2="line.y2"></line>
-    <use :x="start.x" :y="start.y" xlink:href="#symbol-end" @mousedown="onMoveSeg(3, 0)" v-show="isActive"></use>
-    <use :x="end.x" :y="end.y" xlink:href="#symbol-end" @mousedown="onMoveSeg(0, 3)" v-show="isActive"></use>
+    <use :x="start.x" :y="start.y" xlink:href="#symbol-end" @mousedown="onMoveSeg(start, end)" v-show="isActive"></use>
+    <use :x="end.x" :y="end.y" xlink:href="#symbol-end" @mousedown="onMoveSeg(end, start)" v-show="isActive"></use>
   </g>
 </template>
 
@@ -57,8 +57,8 @@ export default {
         const points = this.model.getPointsAround().map(pt => this.toPhysical(pt))
         this.getLines(points)
         this.pointsStr = getPointsStr(points)
-        const position = this.toPhysical(this.model.getPosition(), DataStore.origin)
-        this.tf = matrix.identity().translate(position.x, position.y)
+        this.position = this.toPhysical(this.model.position(), DataStore.origin)
+        this.tf = matrix.identity().translate(this.position.x, this.position.y)
         this.isActive = this.model.attrs.isActive
       },
       deep: true,
@@ -107,19 +107,29 @@ export default {
     onMoveSeg (start, end) {
       if (!DataStore.activeCmd) {
         event.stopPropagation()
+        this.$bus.$emit('moveSymbolSeg', {
+          drawing: DataStore.drawing,
+          canvas: DataStore.drawing.$el,
+          activeEnt: this.model,
+          startPos: Point.addOffset(start, this.position),
+          endPos: Point.addOffset(end, this.position)
+        })
       }
     },
 
     onMove () {
       if (!DataStore.activeCmd) {
         event.stopPropagation()
-        DataStore.addSelected(this.model)
-        /* this.$bus.$emit('moveWall', {
+        if (!this.model.isActive()) {
+          DataStore.addSelected(this.model)
+          return
+        }
+        this.$bus.$emit('moveSymbol', {
           drawing: DataStore.drawing,
           canvas: DataStore.drawing.$el,
           activeEnt: this.model,
-          startPos: this.toPhysical(this.model.getPosition())
-        }) */
+          startPos: this.toPhysical(this.model.position())
+        })
       }
     }
   }

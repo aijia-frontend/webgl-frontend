@@ -102,7 +102,7 @@ const PreViewBuilder = {
     if (options.isModel) {
       attrs = {
         angle: CST.toPhysical(attrs.angle(), { tag: 'angle' }),
-        position: CST.toPhysical(attrs.getPosition(), { tag: 'point', origin: DataStore.origin }),
+        position: CST.toPhysical(attrs.position(), { tag: 'point', origin: DataStore.origin }),
         width: CST.mm.toPhysical(attrs.width()),
         deepth: CST.mm.toPhysical(attrs.deepth())
       }

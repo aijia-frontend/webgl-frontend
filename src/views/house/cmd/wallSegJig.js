@@ -75,7 +75,7 @@ const wallSegJig = MoveJig.extend({
       wall = item.getWall()
       originPoints = wall.originPoints()
       line = new Line(originPoints[0], originPoints[1])
-      param = line.pointParam(item.getPosition())
+      param = line.pointParam(item.position())
       return {
         ent: item,
         param

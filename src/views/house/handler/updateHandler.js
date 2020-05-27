@@ -127,7 +127,7 @@ const UpdateHandler = BaseHandler.extend({
   },
 
   wallsHandler (data) {
-    const walls = data.filter(item => item.isOrigin).map(item => item.ent)
+    const walls = data.filter(item => item.ent.type === 'wall' && item.isOrigin).map(item => item.ent)
     let relations
     walls.forEach(wall => {
       relations = this.getIntersectWalls(wall)

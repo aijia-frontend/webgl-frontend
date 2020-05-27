@@ -242,7 +242,7 @@ const NewWallHandler = BaseHandler.extend({
     }
     this.updateEnt(wall, {
       points: pts
-    }/* , { silent: true } */)
+    }, { silent: true })
   },
 
   breakWall (wall, inter, weight) {
@@ -269,7 +269,7 @@ const NewWallHandler = BaseHandler.extend({
     pts1[4] = pts2[5] = p1
     this.updateEnt(wall, {
       points: pts1
-    }/* , { silent: true } */)
+    }, { silent: true })
     const wall2 = this.createWall({
       points: pts2,
       weight: wall.weight()

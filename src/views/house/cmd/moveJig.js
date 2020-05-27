@@ -35,7 +35,7 @@ const MoveJig = Jig.extend({
     // 添加关联图形
     let type = ''
     let tryout = null
-    this.refEnts.forEach(ent => {
+    this.refEnts && this.refEnts.forEach(ent => {
       if (ent.uid === this.activeEnt.uid) return
       type = ent.type + 's'
       if (!this[type]) this[type] = []

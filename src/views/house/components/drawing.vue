@@ -282,11 +282,11 @@ export default {
         .translate(pos.x, pos.y)
       if (tf.a <= minScale) {
         console.log('can not zoom out. scale:', this.tf.a)
-        return
+        // return
       }
       if (tf.a >= maxScale) {
         console.log('can not zoom in. scale:', this.tf.a)
-        return
+        // return
       }
 
       this.transform(tf)

@@ -4,7 +4,7 @@ import { Point, Line } from '@/common/geometry'
 import SvgRenderer from '@/common/renderTools'
 import CST from '@/common/cst/main'
 import Vector from '@/common/vector'
-// import _uniq from 'lodash/uniq'
+import Matrix from '@/common/matrix'
 import _cloneDeep from 'lodash/cloneDeep'
 import _sortBy from 'lodash/sortBy'
 import { getPointsStr, pointAdd, pointRotate, changeStart, getIntersect } from '@/common/util/pointUtil'
@@ -30,16 +30,23 @@ const addToColl = (coll, ent) => {
   }
 }
 
+/* 相关组件 */
+const getRefEnts = (wall, ents, dataStore) => {
+  return dataStore.symbols().filter(item => item.attrs.wall && wall.uid === item.attrs.wall)
+}
+
 /*
   查找直接相关墙体
 */
-const getRefEntsMap = (joint, refWalls = []) => {
+const getRefEntsMap = (joint, refWalls = [], dataStore) => {
   /* 当前节点
     不控制数量
   */
   const refEntsMap = []
   const originWalls = joint.walls()
   let chain = {}
+  let refs = []
+  let symbols = []
   originWalls.forEach(wall => {
     chain = {
       origin: {
@@ -48,12 +55,18 @@ const getRefEntsMap = (joint, refWalls = []) => {
       refs: []
     }
     const joints = wall.joints().filter(item => item.uid !== joint.uid)
-    const refs = []
+    refs = []
     if (joints.length) {
       // refs
       addToCollByPond(refWalls, refs, joints[0].walls().filter(item => item.uid !== wall.uid))
     }
     chain.refs = refs.map(item => {
+      return {
+        ent: item
+      }
+    })
+    symbols = getRefEnts(wall, [], dataStore)
+    chain.symbols = symbols.map(item => {
       return {
         ent: item
       }
@@ -70,15 +83,14 @@ const MoveJointJig = MoveJig.extend({
 
   start () {
     // 查找相关
-    this.refEntsMap = getRefEntsMap(this.activeEnt, this.refWalls)
+    this.refEntsMap = getRefEntsMap(this.activeEnt, this.refWalls, this.dataStore)
     this.refEnts = []
     this.refEntsMap.forEach(chain => {
-      this.refEnts.push(chain.origin.ent, ...(chain.refs.map(item => item.ent)))
+      this.refEnts.push(chain.origin.ent, ...(chain.refs.map(item => item.ent)), ...(chain.symbols.map(item => item.ent)))
     })
     this.activeEnts = []
     this.activeEnts.push(...this.refEnts, this.activeEnt)
     this.initData()
-    this.refSymbols = []
 
     MoveJig.prototype.start.apply(this, arguments)
   },
@@ -88,13 +100,22 @@ const MoveJointJig = MoveJig.extend({
     // 在不同链上的 同一个墙
     this.publicEnts = []
     // chain
-    let points, refPoints, changeS
+    let points, refPoints, changeS, line
     this.refEntsMap.forEach(item => {
       points = item.origin.ent.points()
       if (Point.equal(item.origin.ent.end(), this.originPosition)) {
         points = changeStart(points)
         item.startChange = true
       }
+      // 相关组件
+      line = new Line(points[0], points[3])
+      item.symbols = item.symbols.map(symbol => {
+        return {
+          ent: symbol.ent,
+          param: line.pointParam(symbol.ent.position())
+        }
+      })
+      // 相关墙体
       item.refs = item.refs.map(ref => {
         refPoints = ref.ent.points()
         changeS = false
@@ -204,6 +225,8 @@ const MoveJointJig = MoveJig.extend({
       wallInfo2 = refEntsMap[(index + 1) % length].origin
       this.update2Walls(wallInfo1, wallInfo2)
     })
+    // 更新组件
+    this.updateSymbols()
     // 更新相关墙体
     this.updateRefWalls()
   },
@@ -221,6 +244,22 @@ const MoveJointJig = MoveJig.extend({
 
     SvgRenderer.attr(this.preview[info1.ent.uid], { points: getPointsStr(info1.points) })
     SvgRenderer.attr(this.preview[info2.ent.uid], { points: getPointsStr(info2.points) })
+  },
+
+  updateSymbols () {
+    let line, position, tf
+    this.refEntsMap.forEach(chain => {
+      line = new Line(chain.origin.points[0], chain.origin.points[3])
+      chain.symbols.forEach(symbol => {
+        position = line.paramPoint(symbol.param)
+        tf = Matrix.identity()
+        tf.rotate(chain.origin.angle)
+        tf.translate(position.x, position.y)
+        SvgRenderer.attr(this.preview[symbol.ent.uid], { transform: tf.toString() })
+        symbol.position = position
+        symbol.angle = chain.origin.angle
+      })
+    })
   },
 
   updateRefWalls () {
@@ -282,6 +321,7 @@ const MoveJointJig = MoveJig.extend({
       const dis = Point.distance(this.startPos, this.endPos)
       if (dis >= 20) {
         const refs = []
+        const symbols = []
         let publicInfo
         this.refEntsMap.forEach(item => {
           addToColl(refs, Object.assign({}, item.origin, { isOrigin: true }))
@@ -292,11 +332,14 @@ const MoveJointJig = MoveJig.extend({
             }
             addToColl(refs, ref)
           })
+          item.symbols.forEach(symbol => {
+            addToColl(symbols, symbol)
+          })
         })
         this.data = [{
           ent: this.activeEnt,
           position: this.endPos
-        }, ...refs]
+        }, ...refs, ...symbols]
         this.end()
       } else this.cancel()
     } else this.cancel()

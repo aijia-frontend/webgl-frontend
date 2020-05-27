@@ -18,20 +18,24 @@ const MoveJoint = JigCmd.extend({
       return {
         ent: item.ent,
         isOrigin: item.isOrigin,
-        data: _pick(item, ['position', 'points'])
+        data: _pick(item, ['position', 'points', 'angle'])
       }
     })
-    const toLogical = (pt) => {
+    const toLogical = (pt, tag = 'point') => {
       return CST.toLogical(pt, {
-        tag: 'point',
+        tag,
         origin: DataStore.origin
       })
     }
     updates.forEach(item => {
       if (item.data.points) {
-        item.data.points = item.data.points.map(toLogical)
-      } else if (item.data.position) {
+        item.data.points = item.data.points.map(pt => toLogical(pt))
+      }
+      if (item.data.position) {
         item.data.position = toLogical(item.data.position)
+      }
+      if (item.data.angle) {
+        item.data.angle = toLogical(item.data.angle, 'angle')
       }
     })
 
